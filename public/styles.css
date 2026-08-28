@@ -1,0 +1,204 @@
+:root {
+  --navy: #214e9f;
+  --navy-dark: #173c7c;
+  --ink: #152033;
+  --muted: #667085;
+  --line: #d9e0ea;
+  --soft: #f5f7fb;
+  --white: #ffffff;
+  --danger: #b42318;
+  --radius: 12px;
+  --shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: #eef2f7;
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+}
+
+.app-shell {
+  width: min(100%, 980px);
+  margin: 0 auto;
+  background: var(--white);
+  min-height: 100vh;
+  box-shadow: var(--shadow);
+}
+
+.app-header {
+  background: var(--navy);
+  color: var(--white);
+  padding: 26px 34px 24px;
+  text-align: center;
+}
+
+.app-header h1 {
+  margin: 3px 0 0;
+  font-size: clamp(1.7rem, 4vw, 2.35rem);
+  line-height: 1.15;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.8rem;
+  font-style: italic;
+  opacity: 0.92;
+}
+
+.progress-wrap { margin-top: 18px; }
+.progress-copy {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 0.85rem;
+}
+.progress-track {
+  height: 7px;
+  margin-top: 8px;
+  background: rgba(255,255,255,.25);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  width: 12.5%;
+  background: var(--white);
+  transition: width .2s ease;
+}
+
+.form-page { display: none; }
+.form-page.active { display: block; }
+
+.hero-placeholder {
+  margin: 28px 34px 0;
+  min-height: 250px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  padding: 30px;
+  text-align: center;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #e9eef7, #dce4ef);
+  color: #41516b;
+  border: 1px solid var(--line);
+}
+.hero-placeholder div { font-size: 1.35rem; font-weight: 700; }
+.hero-placeholder small { max-width: 460px; }
+
+.content-block { padding: 34px; }
+.content-block h2 { font-size: 1.7rem; margin: 0 0 8px; }
+.content-block h3 { margin: 28px 0 14px; font-size: 1.05rem; }
+.content-block p { margin-top: 0; }
+.step-kicker {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .78rem;
+}
+
+.notice {
+  margin: 24px 0 30px;
+  padding: 18px 20px;
+  border: 1px solid #f0c36d;
+  border-radius: var(--radius);
+  background: #fff9ec;
+}
+.notice ul { margin: 8px 0 0; padding-left: 20px; }
+
+.field-grid {
+  display: grid;
+  gap: 18px 22px;
+  margin-bottom: 18px;
+}
+.field-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.field-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.field.full { grid-column: 1 / -1; }
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+  font-size: .92rem;
+  font-weight: 600;
+}
+.field small {
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 400;
+}
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #c9d2df;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--white);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 3px solid rgba(33,78,159,.14);
+  border-color: var(--navy);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--navy);
+  opacity: .55;
+  margin: 30px 0;
+}
+
+.form-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 34px;
+  border-top: 1px solid var(--line);
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(7px);
+}
+.button {
+  border: 0;
+  border-radius: 999px;
+  min-width: 136px;
+  padding: 12px 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.button.primary { background: var(--navy); color: var(--white); margin-left: auto; }
+.button.primary:hover { background: var(--navy-dark); }
+.button.secondary { background: var(--soft); color: var(--ink); }
+.save-state { color: var(--muted); font-size: .8rem; }
+
+.placeholder-page {
+  min-height: 420px;
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  body { background: var(--white); }
+  .app-shell { box-shadow: none; }
+  .app-header, .content-block, .form-actions { padding-left: 20px; padding-right: 20px; }
+  .hero-placeholder { margin: 20px 20px 0; min-height: 180px; }
+  .field-grid.two,
+  .field-grid.three { grid-template-columns: 1fr; gap: 0; }
+  .field.full { grid-column: auto; }
+  .form-actions { flex-wrap: wrap; }
+  .save-state { order: 3; width: 100%; text-align: center; }
+}
