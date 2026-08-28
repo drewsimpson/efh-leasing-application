@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Greenways Condominiums Leasing Application</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="app-shell" id="appShell">
+    <header class="app-header">
+      <p class="eyebrow">Greenways Condominiums</p>
+      <h1 id="pageTitle">Welcome to Greenways Condominiums</h1>
+      <div class="progress-wrap" id="progressWrap" hidden>
+        <div class="progress-copy"><span id="stepLabel">Step 1 of 8</span><span id="stepName">Property Information</span></div>
+        <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+      </div>
+    </header>
+
+    <form id="leasingForm" novalidate>
+      <section class="form-page active" data-page="1" aria-labelledby="welcomeHeading">
+        <div class="hero-placeholder" role="img" aria-label="Greenways Condominiums property image placeholder">
+          <div>Greenways Condominiums</div>
+          <small>Property image will be added from approved website assets</small>
+        </div>
+
+        <div class="content-block intro-copy">
+          <h2 id="welcomeHeading">Rental Application</h2>
+          <p>Thank you for your interest in calling Greenways Condominiums your new home.</p>
+          <p>This application should take approximately 10–15 minutes to complete. Please have your personal information, current and previous address information, employment and income details, landlord information, emergency contact information, and digital copies of required documents available.</p>
+
+          <div class="notice">
+            <strong>Before you begin</strong>
+            <ul>
+              <li>Your progress will be saved in the replacement application.</li>
+              <li>All information should be complete and accurate.</li>
+              <li>Applications are typically reviewed within 3–5 business days.</li>
+              <li>Fair Housing: Equal housing opportunity is provided to all applicants.</li>
+            </ul>
+          </div>
+
+          <h2>Property Information</h2>
+          <div class="field-grid two">
+            <label class="field full">
+              <span>Which unit are you interested in?</span>
+              <small>If you are not sure, enter “Any Available” or your preferred floor/view.</small>
+              <input name="DesiredUnit" autocomplete="off" placeholder="e.g. Unit 101, Penthouse A">
+            </label>
+            <label class="field">
+              <span>When would you like to move in?</span>
+              <small>Select your preferred move-in date.</small>
+              <input type="date" name="DesiredMoveInDate">
+            </label>
+            <label class="field">
+              <span>What lease term are you interested in?</span>
+              <small>Typical lease terms are 12 months.</small>
+              <select name="LeaseTerm">
+                <option value="">Select an option</option>
+                <option>12 Months</option>
+                <option>Other</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-page" data-page="2" aria-labelledby="applicantHeading">
+        <div class="content-block">
+          <p class="step-kicker">Step 1 of 6: Your Information</p>
+          <h2 id="applicantHeading">Primary Applicant Information</h2>
+          <p>Please provide your personal information exactly as it appears on your government-issued identification.</p>
+
+          <h3>Personal Details</h3>
+          <div class="field-grid three">
+            <label class="field"><span>Legal First Name</span><input name="FirstName" autocomplete="given-name" placeholder="e.g. John"></label>
+            <label class="field"><span>Middle Name or Initial</span><input name="MiddleName" autocomplete="additional-name" placeholder="e.g. Alexander or A"></label>
+            <label class="field"><span>Legal Last Name</span><input name="LastName" autocomplete="family-name" placeholder="e.g. Smith"></label>
+          </div>
+          <div class="field-grid two">
+            <label class="field"><span>Date of Birth</span><small>You must be at least 18 years old to apply.</small><input type="date" name="DateOfBirth" autocomplete="bday"></label>
+            <label class="field"><span>Last 4 Digits of Social Security Number</span><small>Required for background screening.</small><input name="SSN_Last4" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="1234"></label>
+          </div>
+
+          <hr>
+          <h3>Current Address</h3>
+          <div class="field-grid two">
+            <label class="field"><span>Address 1</span><input name="CurrentAddress" autocomplete="address-line1"></label>
+            <label class="field"><span>Address 2</span><input name="AddressLine2" autocomplete="address-line2"></label>
+          </div>
+          <div class="field-grid three">
+            <label class="field"><span>City</span><input name="CurrentCity" autocomplete="address-level2" placeholder="e.g. Miami"></label>
+            <label class="field"><span>State</span><select name="CurrentState" autocomplete="address-level1"><option value="">Select state</option><option>FL</option></select></label>
+            <label class="field"><span>ZIP Code</span><input name="CurrentZip" autocomplete="postal-code" inputmode="numeric" placeholder="e.g. 33129"></label>
+          </div>
+
+          <hr>
+          <h3>Contact Information</h3>
+          <label class="field"><span>Email Address</span><small>We’ll send your application confirmation and updates to this email.</small><input type="email" name="Email" autocomplete="email" placeholder="Enter full email address"></label>
+          <div class="field-grid two">
+            <label class="field"><span>Best Phone</span><input type="tel" name="Phone" autocomplete="tel" placeholder="Enter phone number"></label>
+            <label class="field"><span>Secondary Phone</span><input type="tel" name="SecondaryPhone" placeholder="Enter phone number"></label>
+          </div>
+
+          <hr>
+          <h3>Government Identification</h3>
+          <div class="field-grid two">
+            <label class="field"><span>Driver's License or State ID Number</span><input name="DriversLicenseNumber" autocomplete="off"></label>
+            <label class="field"><span>Driver's License State</span><select name="DriversLicenseState"><option value="">Select an option</option><option>FL</option></select></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-page" data-page="3">
+        <div class="content-block placeholder-page">
+          <h2>Additional application pages</h2>
+          <p>Pages 3–8 will be added after the remaining Claris Studio screens and field mappings are inventoried.</p>
+        </div>
+      </section>
+
+      <footer class="form-actions">
+        <button type="button" class="button secondary" id="backButton" hidden>Back</button>
+        <span class="save-state" id="saveState">Draft saved locally</span>
+        <button type="button" class="button primary" id="nextButton">Next</button>
+      </footer>
+    </form>
+  </main>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
