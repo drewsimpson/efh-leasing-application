@@ -1,0 +1,11 @@
+name = "efh-leasing-application"
+main = "src/index.js"
+compatibility_date = "2026-08-28"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[vars]
+APP_ENV = "development"
+PUBLIC_PARENT_ORIGIN = "https://www.efhuttonrealty.com"
