@@ -17,7 +17,7 @@ Initial scaffold only. The first two Studio pages are represented in the fronten
 
 Production FileMaker writes and document uploads are intentionally disabled until the final FileMaker field map, API layouts, and required web-security fields are confirmed.
 
-Deployment trigger commit pushed after connecting the Cloudflare Worker to the GitHub `main` branch.
+Cloudflare Git deployment trigger verified after repository connection on 2026-08-28.
 
 ## Local development
 
