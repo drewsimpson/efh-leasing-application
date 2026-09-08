@@ -342,6 +342,11 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         </div>
       </div>
 
+      <figure id="propMediaWrap" hidden style="margin:18px 0 0;border:1px solid var(--line,#e5e7eb);border-radius:14px;overflow:hidden;background:#f2f4f7">
+        <img id="propMedia" alt="" style="display:block;width:100%;max-height:280px;object-fit:cover">
+        <figcaption id="propMediaCap" style="padding:10px 14px;font:600 13px/1.35 var(--body);color:var(--muted,#5b6472)"></figcaption>
+      </figure>
+
       <div class="sectitle" style="margin-top:28px"><span class="num">2</span><h3>Who will be on the lease?</h3></div>
       <p class="sechint">Count every adult (18+) who will sign the lease. Each adult completes their own section. Minors and other occupants aren't collected here.</p>
       <div class="field" style="margin-top:12px">
@@ -838,7 +843,15 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       document.getElementById('property').innerHTML='<option value="">Unable to load — please refresh</option>';
     }
   }
-  document.getElementById("property").addEventListener("change",function(){populateUnits();saveDraft();});
+  function updatePropMedia(){
+    var pid=document.getElementById('property').value;
+    var wrap=document.getElementById('propMediaWrap'),img=document.getElementById('propMedia'),cap=document.getElementById('propMediaCap');
+    if(!wrap)return;
+    var prop=(CATALOG.properties||[]).filter(function(p){return p.id===pid;})[0];
+    if(prop&&prop.image){ img.onerror=function(){wrap.hidden=true;}; img.src=prop.image; img.alt=prop.name||''; cap.textContent=prop.name||''; wrap.hidden=false; }
+    else { wrap.hidden=true; img.removeAttribute('src'); }
+  }
+  document.getElementById("property").addEventListener("change",function(){populateUnits();updatePropMedia();saveDraft();});
   document.getElementById("unit").addEventListener("change",function(){refreshUnitChip();saveDraft();});
 
   /* ---------- review ---------- */

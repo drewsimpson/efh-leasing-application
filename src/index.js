@@ -34,6 +34,10 @@ const DOC_TYPES = ["DL_Front", "DL_Back", "Bank_Statement", "Paystub", "Credit_R
 // Lease term options offered on the form.
 const LEASE_TERMS = ["6 months", "12 months", "18 months"];
 
+// Per-property hero image, served from the Worker's static assets (keyed by PropertyCode).
+// Drop a photo at public/img/props/<CODE>.<ext> and add its path here.
+const PROPERTY_IMAGES = { GRN730: "/img/props/GRN730.webp" };
+
 // GET /api/catalog — live Property + vacant Unit lists from FileMaker for the form dropdowns.
 async function handleCatalog(env) {
   const fm = new FileMaker(env);
@@ -60,7 +64,11 @@ async function handleCatalog(env) {
       .filter((u) => u.id && u.propertyId);
     const withVacancy = new Set(units.map((u) => u.propertyId));
     const properties = props
-      .map((p) => ({ id: p.__pk_PropertyID, name: p.c_DisplayName || p.PropertyName || p.PropertyCode }))
+      .map((p) => ({
+        id: p.__pk_PropertyID,
+        name: p.PropertyName || p.c_DisplayName || p.PropertyCode,
+        image: PROPERTY_IMAGES[p.PropertyCode] || null,
+      }))
       .filter((p) => p.id && p.name && withVacancy.has(p.id))
       .sort((a, b) => a.name.localeCompare(b.name));
     return json({ ok: true, properties, units, terms: LEASE_TERMS });
