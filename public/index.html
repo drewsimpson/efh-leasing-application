@@ -320,21 +320,14 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <div class="field">
           <label class="flabel" for="property">Property <span class="req">*</span></label>
           <select id="property" data-summary="Property">
-            <option value="">Select a property…</option>
-            <option>Greenways Condominium — Miami, FL</option>
-            <option>Epic Coral Way — Coral Gables, FL</option>
-            <option>Brickell Bay Apartments — Miami, FL</option>
-            <option>Sunset Plaza Residences — Miami, FL</option>
+            <option value="">Loading properties…</option>
           </select>
           <span class="hint">Live list is pulled from TenanTrack (properties &amp; available units).</span>
         </div>
         <div class="field">
           <label class="flabel" for="unit">Unit <span class="req">*</span></label>
           <select id="unit" data-summary="Unit">
-            <option value="">Select a unit…</option>
-            <option>Unit 402 — 2BR / 2BA — $3,150/mo</option>
-            <option>Unit 610 — 1BR / 1BA — $2,400/mo</option>
-            <option>PH-3 — 3BR / 3BA — $6,900/mo</option>
+            <option value="">Select a property first…</option>
           </select>
         </div>
         <div class="field">
@@ -345,7 +338,6 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
           <label class="flabel" for="term">Lease term <span class="req">*</span></label>
           <select id="term" data-summary="Lease term">
             <option value="">Select…</option>
-            <option>12 months</option><option>13 months</option><option>18 months</option><option>24 months</option><option>Month-to-month</option>
           </select>
         </div>
       </div>
@@ -812,22 +804,49 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     renderApplicants(); collectSteps(); renderRail(); saveDraft();
   });
 
-  /* ---------- unit chip ---------- */
+  /* ---------- catalog (live property/unit/terms from FileMaker) ---------- */
+  var CATALOG={properties:[],units:[],terms:[]};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function selText(sel){var o=sel.options[sel.selectedIndex];return o?o.text:'';}
   function refreshUnitChip(){
-    var p=document.getElementById("property").value, u=document.getElementById("unit").value;
+    var pText=selText(document.getElementById("property"));
+    var uSel=document.getElementById("unit"); var uText=uSel.value?selText(uSel):'';
     var t=document.getElementById("unitChipText");
-    if(u){t.textContent=u.split(" — ")[0]+(p?" · "+p.split(" — ")[0]:"");}
-    else if(p){t.textContent=p.split(" — ")[0];}
+    if(uText){t.textContent=uText.split(" — ")[0]+(pText?" · "+pText:"");}
+    else if(pText){t.textContent=pText;}
     else t.textContent="No unit selected";
   }
-  ["property","unit"].forEach(function(id){document.getElementById(id).addEventListener("change",function(){refreshUnitChip();saveDraft();});});
+  function populateUnits(){
+    var pid=document.getElementById("property").value;
+    var us=document.getElementById("unit");
+    var list=(CATALOG.units||[]).filter(function(u){return u.propertyId===pid;});
+    if(!pid){ us.innerHTML='<option value="">Select a property first…</option>'; }
+    else if(!list.length){ us.innerHTML='<option value="">No units currently available</option>'; }
+    else { us.innerHTML='<option value="">Select a unit…</option>'+list.map(function(u){
+      return '<option value="'+esc(u.id)+'" data-rent="'+esc(u.rent)+'" data-label="'+esc(u.label)+'">'+esc(u.label)+'</option>';
+    }).join(''); }
+    refreshUnitChip();
+  }
+  async function loadCatalog(){
+    try{
+      var r=await fetch('/api/catalog'); var j=await r.json(); if(j)CATALOG=j;
+      var ps=document.getElementById('property');
+      ps.innerHTML='<option value="">Select a property…</option>'+(CATALOG.properties||[]).map(function(p){return '<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>';}).join('');
+      var ts=document.getElementById('term');
+      ts.innerHTML='<option value="">Select…</option>'+(CATALOG.terms||[]).map(function(t){return '<option>'+esc(t)+'</option>';}).join('');
+    }catch(e){
+      document.getElementById('property').innerHTML='<option value="">Unable to load — please refresh</option>';
+    }
+  }
+  document.getElementById("property").addEventListener("change",function(){populateUnits();saveDraft();});
+  document.getElementById("unit").addEventListener("change",function(){refreshUnitChip();saveDraft();});
 
   /* ---------- review ---------- */
   function buildReview(){
     var host=document.getElementById("reviewSummary");
     function row(k,v){return '<div><span>'+k+'</span><b>'+(v||'—')+'</b></div>';}
-    var pTxt=document.getElementById("property").value||'—';
-    var uTxt=document.getElementById("unit").value||'—';
+    var pTxt=selText(document.getElementById("property"))||'—';
+    var uTxt=selText(document.getElementById("unit"))||'—';
     var move=document.getElementById("movein").value||'—';
     var term=document.getElementById("term").value||'—';
     var html='<div class="rev"><div class="rh"><b>Home &amp; lease</b><a class="editlink" href="#" data-edit="0">Edit</a></div><div class="rb">'+
@@ -931,9 +950,14 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     var consent={};
     document.querySelectorAll('[data-consent]').forEach(function(c){ consent[c.getAttribute('data-consent')]=ck(c); });
     var sig=document.getElementById('sigCanvas');
+    var propSel=document.getElementById('property'), unitSel=document.getElementById('unit');
+    var unitOpt=unitSel.options[unitSel.selectedIndex];
+    var unitLabel=(unitOpt&&unitOpt.getAttribute('data-label'))||selText(unitSel)||'';
+    var quotedRent=(unitOpt&&unitOpt.getAttribute('data-rent'))||'';
     return {
-      application:{ propertyId:v(document.getElementById('property')), unitId:v(document.getElementById('unit')),
-        unitLabel:v(document.getElementById('unit')), desiredMoveInDate:v(document.getElementById('movein')),
+      application:{ propertyId:v(propSel), propertyName:selText(propSel),
+        unitId:v(unitSel), unitLabel:unitLabel, quotedRent:quotedRent,
+        desiredMoveInDate:v(document.getElementById('movein')),
         leaseTerm:v(document.getElementById('term')), adultCount:adults, numberOfOccupants:adults,
         pets:v(document.getElementById('pets')), petDetails:v(document.getElementById('pets')),
         vehiclesCount:v(document.getElementById('vehicles')), howHeard:v(document.getElementById('hear')) },
@@ -990,6 +1014,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   collectSteps();
   go(0);
   initSig();
+  loadCatalog();
   // init sig lazily when review shown
   var obs=new MutationObserver(function(){if(steps[cur]&&steps[cur].el.getAttribute('data-step')==='review')initSig();});
   obs.observe(document.getElementById("card"),{attributes:true,subtree:true,attributeFilter:['class']});

@@ -31,6 +31,45 @@ function appNumber() {
 }
 const DOC_TYPES = ["DL_Front", "DL_Back", "Bank_Statement", "Paystub", "Credit_Report"];
 
+// Lease term options offered on the form (CUSTOM — confirm/adjust this list).
+const LEASE_TERMS = ["12 months", "18 months", "24 months", "Month-to-month"];
+
+// GET /api/catalog — live Property + vacant Unit lists from FileMaker for the form dropdowns.
+async function handleCatalog(env) {
+  const fm = new FileMaker(env);
+  try {
+    await fm.login();
+    const props = await fm.getRecords("API_PROPERTY", { limit: 500 });
+    // vacant = no current tenant (c_CurrentTenant empty)
+    const vacantUnits = await fm.findRecords("API_UNIT", [{ c_CurrentTenant: "=" }], { limit: 1000 });
+    const num = (v) => Number(String(v ?? "").replace(/[^0-9.]/g, "")) || 0;
+    const units = vacantUnits
+      .map((u) => {
+        const rent = num(u.MonthlyRent) || num(u.c_TotalRent);
+        const bb = [u.Bedrooms, u.Bathrooms].every((x) => x !== undefined && x !== "")
+          ? `${u.Bedrooms}BR/${u.Bathrooms}BA — ` : "";
+        return {
+          id: u.__pk_UnitID,
+          propertyId: u._fk_PropertyID,
+          label: `Unit ${u.UnitNumber || ""} — ${bb}$${rent.toLocaleString()}/mo`.replace(" —  —", " —"),
+          rent,
+        };
+      })
+      .filter((u) => u.id && u.propertyId);
+    const withVacancy = new Set(units.map((u) => u.propertyId));
+    const properties = props
+      .map((p) => ({ id: p.__pk_PropertyID, name: p.c_DisplayName || p.PropertyName || p.PropertyCode }))
+      .filter((p) => p.id && p.name && withVacancy.has(p.id))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    return json({ ok: true, properties, units, terms: LEASE_TERMS });
+  } catch (e) {
+    // Never break the form — return empty lists with the terms so the page still renders.
+    return json({ ok: false, code: "CATALOG_ERROR", message: String(e.message || e), properties: [], units: [], terms: LEASE_TERMS });
+  } finally {
+    await fm.logout();
+  }
+}
+
 async function handleSubmission(request, env, ctx) {
   const ip = request.headers.get("CF-Connecting-IP") || "";
   let payload, files = [];
@@ -190,6 +229,9 @@ async function handleApi(request, env) {
       slackConfigured: Boolean(env.SLACK_WEBHOOK_URL),
       turnstileConfigured: Boolean(env.TURNSTILE_SECRET),
     });
+  }
+  if (request.method === "GET" && url.pathname === "/api/catalog") {
+    return handleCatalog(env);
   }
   if (url.pathname === "/api/applications" && request.method === "POST") {
     try {

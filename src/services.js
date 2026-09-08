@@ -57,6 +57,31 @@ export class FileMaker {
     if (code !== "0") throw new Error(`FM script ${scriptName} failed (${code}): ${j?.messages?.[0]?.message}`);
     return { scriptResult: j?.response?.scriptResult, scriptError: j?.response?.scriptError };
   }
+  // Get up to `limit` records' fieldData from a layout.
+  async getRecords(layout, { limit = 200 } = {}) {
+    const r = await fetch(
+      `${this.base}/layouts/${encodeURIComponent(layout)}/records?_limit=${limit}`,
+      { headers: this.headers() }
+    );
+    const j = await r.json();
+    const code = j?.messages?.[0]?.code;
+    if (code === "401") return []; // no records
+    if (code !== "0") throw new Error(`FM getRecords ${layout} failed (${code}): ${j?.messages?.[0]?.message}`);
+    return (j.response?.data || []).map((d) => d.fieldData);
+  }
+  // Find records (query is an array of FileMaker find requests).
+  async findRecords(layout, query, { limit = 200 } = {}) {
+    const r = await fetch(`${this.base}/layouts/${encodeURIComponent(layout)}/_find`, {
+      method: "POST",
+      headers: this.headers(),
+      body: JSON.stringify({ query, limit }),
+    });
+    const j = await r.json();
+    const code = j?.messages?.[0]?.code;
+    if (code === "401") return []; // no records match
+    if (code !== "0") throw new Error(`FM find ${layout} failed (${code}): ${j?.messages?.[0]?.message}`);
+    return (j.response?.data || []).map((d) => d.fieldData);
+  }
   // Fetch a container's bytes (the Data API returns a temporary URL in field data).
   async getContainer(url) {
     const r = await fetch(url, { headers: { Authorization: `Bearer ${this.token}` } });
