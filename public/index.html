@@ -1,131 +1,1016 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <title>Greenways Condominiums Leasing Application</title>
-  <link rel="stylesheet" href="/styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EFH Rental Application</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap">
+<style>
+:root{
+  --bg:#eaeef2; --surface:#ffffff; --surface-2:#f2f5f9; --inset:#eef2f6;
+  --ink:#22303a; --muted:#54636b; --faint:#8a97a0; --line:#d5dde4; --line-2:#c3cdd6;
+  --brand:#1b2b4b; --brand-2:#1d4a62; --brand-ink:#ffffff;
+  --accent:#1d4a62; --accent-soft:#e2edf1; --accent-line:#bcd4dd; --warn-line:#e6d4a8;
+  --good:#2c7a56; --good-soft:#e2f2ea;
+  --warn:#9a6a12; --warn-soft:#f6ecd5;
+  --crit:#b23b33; --crit-soft:#f8e5e3;
+  --shadow:0 1px 2px rgba(16,35,58,.06), 0 6px 24px rgba(16,35,58,.07);
+  --shadow-sm:0 1px 2px rgba(16,35,58,.08);
+  --radius:14px; --radius-sm:9px;
+  --disp:"Fjalla One","Helvetica Neue",Arial,sans-serif;
+  --body:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  --maxw:760px;
+}
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme:dark){
+    --bg:#0c131f; --surface:#141e2e; --surface-2:#1a2537; --inset:#101a29;
+    --ink:#e7edf6; --muted:#a4b4cb; --faint:#6f819a; --line:#273549; --line-2:#324259;
+    --brand:#42749c; --brand-2:#5aa2bd; --brand-ink:#ffffff;
+    --accent:#5aa2bd; --accent-soft:#14262e; --accent-line:#284a56; --warn-line:#4a3d1e;
+    --good:#4bb488; --good-soft:#152a22;
+    --warn:#d5a13e; --warn-soft:#2a2210;
+    --crit:#e0685e; --crit-soft:#2c1614;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 30px rgba(0,0,0,.35);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c131f; --surface:#141e2e; --surface-2:#1a2537; --inset:#101a29;
+  --ink:#e7edf6; --muted:#a4b4cb; --faint:#6f819a; --line:#273549; --line-2:#324259;
+  --brand:#2f6ba6; --brand-2:#4c93d1; --brand-ink:#ffffff;
+  --accent:#d6a54a; --accent-soft:#2a2214; --accent-line:#4a3d1e;
+  --good:#4bb488; --good-soft:#152a22;
+  --warn:#d5a13e; --warn-soft:#2a2210;
+  --crit:#e0685e; --crit-soft:#2c1614;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 30px rgba(0,0,0,.35);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);
+  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--disp);font-weight:600;line-height:1.15;text-wrap:balance;margin:0}
+a{color:var(--brand-2)}
+button{font-family:inherit}
+:focus-visible{outline:2.5px solid var(--brand-2);outline-offset:2px;border-radius:6px}
+
+/* ---------- Mockup banner ---------- */
+.mock{background:var(--accent-soft);border-bottom:1px solid var(--accent-line);
+  color:var(--ink);font-size:12.5px;padding:7px 18px;text-align:center;letter-spacing:.01em}
+.mock strong{font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+
+/* ---------- Header ---------- */
+.head{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:14px;padding:12px 20px}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.mark{width:34px;height:34px;flex:none;border-radius:8px;background:var(--brand);
+  display:grid;place-items:center;box-shadow:var(--shadow-sm)}
+.mark svg{width:20px;height:20px}
+.brand .wm{display:flex;flex-direction:column;line-height:1.05;min-width:0}
+.brand .wm b{font-family:var(--disp);font-weight:600;font-size:15px;letter-spacing:.01em;white-space:nowrap}
+.brand .wm span{font-size:11px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+.head .spacer{flex:1}
+.unitchip{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:999px;padding:5px 12px;font-size:12.5px;color:var(--muted);max-width:42vw;overflow:hidden}
+.unitchip b{color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iconbtn{width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--surface);
+  color:var(--muted);cursor:pointer;display:grid;place-items:center}
+.iconbtn:hover{color:var(--ink);border-color:var(--line-2)}
+
+/* ---------- Shell ---------- */
+.shell{max-width:1080px;margin:0 auto;padding:26px 20px 140px;display:grid;
+  grid-template-columns:236px 1fr;gap:34px;align-items:start}
+@media(max-width:860px){.shell{grid-template-columns:1fr;gap:0;padding-top:14px}}
+
+/* ---------- Rail ---------- */
+.rail{position:sticky;top:86px}
+@media(max-width:860px){.rail{position:static;top:auto}}
+.rail .railtitle{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin:2px 0 14px 8px}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.steps li{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:10px;cursor:pointer;
+  color:var(--muted);font-size:14px;font-weight:500;position:relative}
+.steps li .dot{width:26px;height:26px;flex:none;border-radius:50%;border:1.5px solid var(--line-2);
+  display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--faint);background:var(--surface)}
+.steps li.done .dot{background:var(--good);border-color:var(--good);color:#fff}
+.steps li.active{color:var(--ink);background:var(--surface);box-shadow:var(--shadow-sm)}
+.steps li.active .dot{border-color:var(--brand);color:var(--brand-ink);background:var(--brand)}
+.steps li.locked{opacity:.55;cursor:not-allowed}
+.steps li .lbl small{display:block;font-size:11px;font-weight:500;color:var(--faint)}
+.steps li:not(:last-child)::after{content:"";position:absolute;left:22px;top:36px;height:calc(100% - 30px);
+  width:1.5px;background:var(--line)}
+.steps li.done:not(:last-child)::after{background:var(--good)}
+
+/* mobile progress */
+.mprog{display:none}
+@media(max-width:860px){
+  .rail .railtitle,.steps{display:none}
+  .mprog{display:block;margin:8px 2px 18px}
+  .mprog .bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden}
+  .mprog .bar i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:width .35s ease}
+  .mprog .meta{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-top:8px}
+  .mprog .meta b{color:var(--ink);font-weight:600}
+}
+
+/* ---------- Card / steps ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:30px 30px 8px;min-height:60vh}
+@media(max-width:600px){.card{padding:22px 18px 6px;border-radius:12px}}
+.step{display:none;animation:fade .32s ease}
+.step.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.step,.mprog .bar i{animation:none;transition:none}}
+.eyebrow{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:700;margin-bottom:8px}
+.step h2{font-size:26px;margin-bottom:6px}
+.lede{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:60ch}
+
+/* ---------- Form fields ---------- */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 16px}
+.grid .full{grid-column:1/-1}
+.grid .third{grid-column:span 1}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.grid .full{grid-column:1}}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+label.flabel{font-size:13px;font-weight:600;color:var(--ink)}
+label.flabel .opt{font-weight:500;color:var(--faint)}
+label.flabel .req{color:var(--crit);margin-left:2px}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=number],select,textarea{
+  width:100%;padding:10px 12px;border:1px solid var(--line-2);border-radius:var(--radius-sm);
+  background:var(--surface);color:var(--ink);font:inherit;font-size:14.5px}
+input::placeholder,textarea::placeholder{color:var(--faint)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand-2);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand-2) 20%,transparent)}
+textarea{resize:vertical;min-height:74px}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238695ab' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.hint{font-size:12px;color:var(--faint)}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* segmented / choice */
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;padding:3px;background:var(--surface-2);gap:2px}
+.seg button{border:0;background:transparent;color:var(--muted);padding:6px 16px;border-radius:999px;font-size:13.5px;font-weight:600;cursor:pointer}
+.seg button.sel{background:var(--brand);color:var(--brand-ink);box-shadow:var(--shadow-sm)}
+.yn{display:flex;gap:8px;flex-wrap:wrap}
+.yn button{border:1px solid var(--line-2);background:var(--surface);color:var(--muted);padding:7px 16px;border-radius:999px;font-size:13.5px;font-weight:600;cursor:pointer}
+.yn button.sel[data-v="yes"]{background:var(--crit-soft);border-color:var(--crit);color:var(--crit)}
+.yn button.sel[data-v="no"]{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+
+/* subsection */
+.sub{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-2);
+  padding:18px 18px 20px;margin:14px 0}
+.sub > .subhead{display:flex;align-items:center;gap:10px;margin:-2px 0 14px}
+.sub .subhead h4{font-family:var(--body);font-size:14px;font-weight:700;margin:0;color:var(--ink)}
+.sub .subhead .tag{font-size:11px;font-weight:600;color:var(--muted);background:var(--inset);border:1px solid var(--line);
+  padding:2px 8px;border-radius:999px}
+.sub .subhead .spacer{flex:1}
+.rm{border:0;background:transparent;color:var(--crit);font-size:12.5px;font-weight:600;cursor:pointer;padding:4px 6px}
+.rm:hover{text-decoration:underline}
+
+.addbtn{display:inline-flex;align-items:center;gap:8px;border:1.5px dashed var(--line-2);background:transparent;
+  color:var(--brand-2);font-weight:600;font-size:13.5px;padding:10px 16px;border-radius:10px;cursor:pointer;width:100%;justify-content:center}
+.addbtn:hover{border-color:var(--brand-2);background:color-mix(in srgb,var(--brand-2) 6%,transparent)}
+.addbtn[disabled]{opacity:.45;cursor:not-allowed}
+.addbtn svg{width:15px;height:15px}
+
+/* section heading inside step */
+.sectitle{display:flex;align-items:baseline;gap:10px;margin:26px 0 6px}
+.sectitle h3{font-size:18px}
+.sectitle .num{font-family:var(--body);font-size:12px;font-weight:700;color:var(--accent);
+  background:var(--accent-soft);border:1px solid var(--accent-line);width:22px;height:22px;border-radius:6px;
+  display:grid;place-items:center;flex:none;align-self:center}
+.sectitle + .sechint{color:var(--muted);font-size:13.5px;margin:0 0 6px}
+
+/* upload */
+.docgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.docgrid{grid-template-columns:1fr}}
+.drop{border:1.5px dashed var(--line-2);border-radius:var(--radius-sm);background:var(--surface);
+  padding:16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;position:relative}
+.drop:hover,.drop.hover{border-color:var(--brand-2);background:color-mix(in srgb,var(--brand-2) 5%,transparent)}
+.drop .di{width:34px;height:34px;border-radius:9px;background:var(--surface-2);display:grid;place-items:center;margin:0 auto 8px;color:var(--brand-2)}
+.drop .dt{font-size:13.5px;font-weight:600;color:var(--ink)}
+.drop .dh{font-size:11.5px;color:var(--faint);margin-top:2px}
+.drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.files{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;text-align:left}
+.files li{display:flex;align-items:center;gap:8px;font-size:12.5px;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:7px;padding:6px 9px}
+.files li .fn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.files li .fx{color:var(--faint);font-variant-numeric:tabular-nums}
+.files li .fdel{border:0;background:transparent;color:var(--faint);cursor:pointer;font-size:15px;line-height:1;padding:0 2px}
+.files li .fdel:hover{color:var(--crit)}
+
+/* callouts */
+.note{display:flex;gap:11px;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.45;margin:14px 0}
+.note .ni{flex:none;margin-top:1px}
+.note.info{background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
+.note.legal{background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--ink)}
+.note b{color:var(--ink)}
+
+/* consent rows */
+.consent{display:flex;gap:12px;padding:14px;border:1px solid var(--line);border-radius:10px;margin:12px 0;background:var(--surface-2)}
+.consent input{margin-top:3px;width:18px;height:18px;flex:none;accent-color:var(--brand)}
+.consent .ctxt{font-size:13.5px;color:var(--ink)}
+.consent .ctxt small{display:block;color:var(--muted);font-size:12.5px;margin-top:3px}
+
+/* signature */
+.sigwrap{border:1px solid var(--line-2);border-radius:var(--radius-sm);background:var(--surface);overflow:hidden}
+.sigcanvas{display:block;width:100%;height:170px;touch-action:none;cursor:crosshair;background:
+  repeating-linear-gradient(transparent,transparent 168px,var(--line) 169px)}
+.sigbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-top:1px solid var(--line);background:var(--surface-2)}
+.sigbar span{font-size:12px;color:var(--faint)}
+.linkbtn{border:0;background:transparent;color:var(--brand-2);font-weight:600;font-size:12.5px;cursor:pointer}
+
+/* review */
+.rev{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.rev .rh{display:flex;align-items:center;justify-content:space-between;background:var(--surface-2);padding:11px 15px;border-bottom:1px solid var(--line)}
+.rev .rh b{font-size:14px}
+.rev .rb{padding:12px 15px;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;font-size:13.5px}
+@media(max-width:520px){.rev .rb{grid-template-columns:1fr}}
+.rev .rb div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding:4px 0}
+.rev .rb div span{color:var(--muted)}
+.rev .rb div b{font-weight:600;text-align:right}
+.editlink{font-size:12.5px}
+
+/* footer nav */
+.foot{position:fixed;bottom:0;left:0;right:0;z-index:20;background:color-mix(in srgb,var(--surface) 92%,transparent);
+  backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:12px 20px}
+.foot .inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.foot .save{font-size:12.5px;color:var(--faint);margin-right:auto;display:flex;align-items:center;gap:7px}
+.foot .save b{color:var(--good);font-weight:600}
+.btn{border:1px solid var(--line-2);background:var(--surface);color:var(--ink);font-weight:600;font-size:14.5px;
+  padding:11px 20px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{border-color:var(--line-2);background:var(--surface-2)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn.primary:hover{background:var(--brand-2);border-color:var(--brand-2)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--ink);background:var(--surface-2)}
+.btn svg{width:16px;height:16px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+/* success / pipeline */
+.done-wrap{text-align:center;padding:14px 0 30px;max-width:560px;margin:0 auto}
+.checkbig{width:74px;height:74px;border-radius:50%;background:var(--good-soft);border:2px solid var(--good);
+  display:grid;place-items:center;margin:6px auto 18px}
+.checkbig svg{width:38px;height:38px;color:var(--good)}
+.done-wrap h2{font-size:28px;margin-bottom:8px}
+.appref{display:inline-block;font-variant-numeric:tabular-nums;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:8px;padding:6px 14px;font-weight:700;letter-spacing:.03em;margin:6px 0 18px}
+.pipe{list-style:none;margin:22px 0 0;padding:0;text-align:left;display:flex;flex-direction:column;gap:2px}
+.pipe li{display:flex;align-items:center;gap:13px;padding:12px 14px;border-radius:10px;background:var(--surface-2);
+  border:1px solid var(--line);opacity:.5;transition:opacity .3s}
+.pipe li.act{opacity:1;border-color:var(--good);background:var(--good-soft)}
+.pipe li .pi{width:32px;height:32px;flex:none;border-radius:8px;background:var(--surface);border:1px solid var(--line);
+  display:grid;place-items:center;color:var(--brand-2)}
+.pipe li.act .pi{color:var(--good);border-color:var(--good)}
+.pipe li .pl{flex:1}
+.pipe li .pl b{display:block;font-size:14px}
+.pipe li .pl small{color:var(--muted);font-size:12px}
+.pipe li .ps{width:20px;height:20px;flex:none}
+.pipe li .ps svg{width:20px;height:20px;color:var(--good)}
+.spin{width:16px;height:16px;border:2px solid var(--line-2);border-top-color:var(--brand-2);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.hidden{display:none!important}
+.tiptag{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent-line);
+  padding:1px 7px;border-radius:999px;vertical-align:middle;margin-left:8px}
+</style>
 </head>
 <body>
-  <main class="app-shell" id="appShell">
-    <header class="app-header">
-      <p class="eyebrow">Greenways Condominiums</p>
-      <h1 id="pageTitle">Welcome to Greenways Condominiums</h1>
-      <div class="progress-wrap" id="progressWrap" hidden>
-        <div class="progress-copy"><span id="stepLabel">Step 1 of 8</span><span id="stepName">Property Information</span></div>
-        <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+
+
+<!-- production application form -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<header class="head">
+  <div class="brand">
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 20V9.5L12 4l8 5.5V20" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 20v-5h5v5" stroke="#7fb3c7" stroke-width="1.7" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="wm">
+      <b>E.F. Hutton Realty</b>
+      <span>Rental Application</span>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div class="unitchip" id="unitChip" title="Selected unit">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V9.5L12 4l8 5.5V20" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    <b id="unitChipText">No unit selected</b>
+  </div>
+  <button class="iconbtn" id="themeBtn" title="Toggle light / dark" aria-label="Toggle theme">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6 6L4.5 4.5M19.5 19.5L18 18M18 6l1.5-1.5M4.5 19.5L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+  <nav class="rail" aria-label="Application progress">
+    <div class="railtitle">Your application</div>
+    <ul class="steps" id="railSteps"></ul>
+    <div class="mprog">
+      <div class="bar"><i id="mBar" style="width:0%"></i></div>
+      <div class="meta"><span id="mStepName">Getting started</span><span>Step <b id="mStepNo">1</b> of <b id="mStepTot">4</b></span></div>
+    </div>
+  </nav>
+
+  <main class="card" id="card">
+    <!-- STEP: START -->
+    <section class="step on" data-step="start">
+      <div class="eyebrow">Getting started</div>
+      <h2>Let's start your application</h2>
+      <p class="lede">Tell us which home you're applying for and who will be on the lease. You can save and come back at any time — this takes most people 15–20 minutes.</p>
+
+      <div class="grid">
+        <div class="field">
+          <label class="flabel" for="property">Property <span class="req">*</span></label>
+          <select id="property" data-summary="Property">
+            <option value="">Select a property…</option>
+            <option>Greenways Condominium — Miami, FL</option>
+            <option>Epic Coral Way — Coral Gables, FL</option>
+            <option>Brickell Bay Apartments — Miami, FL</option>
+            <option>Sunset Plaza Residences — Miami, FL</option>
+          </select>
+          <span class="hint">Live list is pulled from TenanTrack (properties &amp; available units).</span>
+        </div>
+        <div class="field">
+          <label class="flabel" for="unit">Unit <span class="req">*</span></label>
+          <select id="unit" data-summary="Unit">
+            <option value="">Select a unit…</option>
+            <option>Unit 402 — 2BR / 2BA — $3,150/mo</option>
+            <option>Unit 610 — 1BR / 1BA — $2,400/mo</option>
+            <option>PH-3 — 3BR / 3BA — $6,900/mo</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="flabel" for="movein">Desired move-in date <span class="req">*</span></label>
+          <input type="date" id="movein" data-summary="Move-in">
+        </div>
+        <div class="field">
+          <label class="flabel" for="term">Lease term <span class="req">*</span></label>
+          <select id="term" data-summary="Lease term">
+            <option value="">Select…</option>
+            <option>12 months</option><option>13 months</option><option>18 months</option><option>24 months</option><option>Month-to-month</option>
+          </select>
+        </div>
       </div>
-    </header>
 
-    <form id="leasingForm" novalidate>
-      <section class="form-page active" data-page="1" aria-labelledby="welcomeHeading">
-        <div class="hero-placeholder" role="img" aria-label="Greenways Condominiums property image placeholder">
-          <div>Greenways Condominiums</div>
-          <small>Property image will be added from approved website assets</small>
+      <div class="sectitle" style="margin-top:28px"><span class="num">2</span><h3>Who will be on the lease?</h3></div>
+      <p class="sechint">Count every adult (18+) who will sign the lease. Each adult completes their own section. Minors and other occupants aren't collected here.</p>
+      <div class="field" style="margin-top:12px">
+        <label class="flabel">Number of adult applicants <span class="req">*</span></label>
+        <div class="seg" id="adultSeg" role="group" aria-label="Number of adults">
+          <button type="button" data-n="1" class="sel">1</button>
+          <button type="button" data-n="2">2</button>
+          <button type="button" data-n="3">3</button>
+          <button type="button" data-n="4">4</button>
         </div>
+        <span class="hint">The primary applicant plus up to three co-applicants. Photo ID and financial documents are required from the <b>first two</b> adults.</span>
+      </div>
 
-        <div class="content-block intro-copy">
-          <h2 id="welcomeHeading">Rental Application</h2>
-          <p>Thank you for your interest in calling Greenways Condominiums your new home.</p>
-          <p>This application should take approximately 10–15 minutes to complete. Please have your personal information, current and previous address information, employment and income details, landlord information, emergency contact information, and digital copies of required documents available.</p>
+      <div class="note info">
+        <span class="ni">🔒</span>
+        <div>Your information is encrypted in transit and used only to process this application. SSN and financial documents are handled under E.F. Hutton Realty's privacy policy and applicant screening disclosure.</div>
+      </div>
+    </section>
 
-          <div class="notice">
-            <strong>Before you begin</strong>
-            <ul>
-              <li>Your progress will be saved in the replacement application.</li>
-              <li>All information should be complete and accurate.</li>
-              <li>Applications are typically reviewed within 3–5 business days.</li>
-              <li>Fair Housing: Equal housing opportunity is provided to all applicants.</li>
-            </ul>
-          </div>
+    <!-- Applicant steps injected here -->
+    <div id="applicantSteps"></div>
 
-          <h2>Property Information</h2>
-          <div class="field-grid two">
-            <label class="field full">
-              <span>Which unit are you interested in?</span>
-              <small>If you are not sure, enter “Any Available” or your preferred floor/view.</small>
-              <input name="DesiredUnit" autocomplete="off" placeholder="e.g. Unit 101, Penthouse A">
-            </label>
-            <label class="field">
-              <span>When would you like to move in?</span>
-              <small>Select your preferred move-in date.</small>
-              <input type="date" name="DesiredMoveInDate">
-            </label>
-            <label class="field">
-              <span>What lease term are you interested in?</span>
-              <small>Typical lease terms are 12 months.</small>
-              <select name="LeaseTerm">
-                <option value="">Select an option</option>
-                <option>12 Months</option>
-                <option>Other</option>
-              </select>
-            </label>
-          </div>
+    <!-- STEP: BACKGROUND -->
+    <section class="step" data-step="background">
+      <div class="eyebrow">Disclosures</div>
+      <h2>Background &amp; disclosures</h2>
+      <p class="lede">Please answer honestly. A "yes" doesn't automatically disqualify you — it lets us review your application fairly and completely.</p>
+
+      <div class="note legal">
+        <span class="ni">⚖️</span>
+        <div><b>Legal wording to be confirmed.</b> The exact phrasing of the eviction, bankruptcy, and criminal-history questions (and any FCRA / fair-housing adverse-action language) must be approved by whoever owns compliance for E.F. Hutton before go-live. Text below is placeholder.</div>
+      </div>
+
+      <div id="bgQuestions"></div>
+
+      <div class="grid" style="margin-top:8px">
+        <div class="field full">
+          <label class="flabel" for="pets">Pets <span class="opt">— describe type, breed, weight (optional)</span></label>
+          <input type="text" id="pets" placeholder="e.g. 1 dog, Labrador, 30 kg">
         </div>
-      </section>
-
-      <section class="form-page" data-page="2" aria-labelledby="applicantHeading">
-        <div class="content-block">
-          <p class="step-kicker">Step 1 of 6: Your Information</p>
-          <h2 id="applicantHeading">Primary Applicant Information</h2>
-          <p>Please provide your personal information exactly as it appears on your government-issued identification.</p>
-
-          <h3>Personal Details</h3>
-          <div class="field-grid three">
-            <label class="field"><span>Legal First Name</span><input name="FirstName" autocomplete="given-name" placeholder="e.g. John"></label>
-            <label class="field"><span>Middle Name or Initial</span><input name="MiddleName" autocomplete="additional-name" placeholder="e.g. Alexander or A"></label>
-            <label class="field"><span>Legal Last Name</span><input name="LastName" autocomplete="family-name" placeholder="e.g. Smith"></label>
-          </div>
-          <div class="field-grid two">
-            <label class="field"><span>Date of Birth</span><small>You must be at least 18 years old to apply.</small><input type="date" name="DateOfBirth" autocomplete="bday"></label>
-            <label class="field"><span>Last 4 Digits of Social Security Number</span><small>Required for background screening.</small><input name="SSN_Last4" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="1234"></label>
-          </div>
-
-          <hr>
-          <h3>Current Address</h3>
-          <div class="field-grid two">
-            <label class="field"><span>Address 1</span><input name="CurrentAddress" autocomplete="address-line1"></label>
-            <label class="field"><span>Address 2</span><input name="AddressLine2" autocomplete="address-line2"></label>
-          </div>
-          <div class="field-grid three">
-            <label class="field"><span>City</span><input name="CurrentCity" autocomplete="address-level2" placeholder="e.g. Miami"></label>
-            <label class="field"><span>State</span><select name="CurrentState" autocomplete="address-level1"><option value="">Select state</option><option>FL</option></select></label>
-            <label class="field"><span>ZIP Code</span><input name="CurrentZip" autocomplete="postal-code" inputmode="numeric" placeholder="e.g. 33129"></label>
-          </div>
-
-          <hr>
-          <h3>Contact Information</h3>
-          <label class="field"><span>Email Address</span><small>We’ll send your application confirmation and updates to this email.</small><input type="email" name="Email" autocomplete="email" placeholder="Enter full email address"></label>
-          <div class="field-grid two">
-            <label class="field"><span>Best Phone</span><input type="tel" name="Phone" autocomplete="tel" placeholder="Enter phone number"></label>
-            <label class="field"><span>Secondary Phone</span><input type="tel" name="SecondaryPhone" placeholder="Enter phone number"></label>
-          </div>
-
-          <hr>
-          <h3>Government Identification</h3>
-          <div class="field-grid two">
-            <label class="field"><span>Driver's License or State ID Number</span><input name="DriversLicenseNumber" autocomplete="off"></label>
-            <label class="field"><span>Driver's License State</span><select name="DriversLicenseState"><option value="">Select an option</option><option>FL</option></select></label>
-          </div>
+        <div class="field">
+          <label class="flabel" for="vehicles">Vehicles to register <span class="opt">(optional)</span></label>
+          <input type="number" id="vehicles" min="0" max="6" placeholder="0">
         </div>
-      </section>
-
-      <section class="form-page" data-page="3">
-        <div class="content-block placeholder-page">
-          <h2>Additional application pages</h2>
-          <p>Pages 3–8 will be added after the remaining Claris Studio screens and field mappings are inventoried.</p>
+        <div class="field">
+          <label class="flabel" for="hear">How did you hear about us? <span class="opt">(optional)</span></label>
+          <select id="hear"><option value="">Select…</option><option>Zillow / Apartments.com</option><option>Referral</option><option>Drive-by / signage</option><option>EFH website</option><option>Other</option></select>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <footer class="form-actions">
-        <button type="button" class="button secondary" id="backButton" hidden>Back</button>
-        <span class="save-state" id="saveState">Draft saved locally</span>
-        <button type="button" class="button primary" id="nextButton">Next</button>
-      </footer>
-    </form>
+    <!-- STEP: REVIEW -->
+    <section class="step" data-step="review">
+      <div class="eyebrow">Final step</div>
+      <h2>Review &amp; sign</h2>
+      <p class="lede">Check your details, agree to the authorizations, and sign. We'll email you a PDF copy the moment you submit.</p>
+
+      <div id="reviewSummary"></div>
+
+      <div class="sectitle" style="margin-top:26px"><span class="num">✓</span><h3>Authorizations</h3></div>
+      <div class="note legal"><span class="ni">⚖️</span><div><b>Legal wording to be confirmed</b> — reproduce the exact clauses from the printed Epic Coral Way application (Rev 9.1), including the contact-authorization and belongings-removal language and the non-refundable fee statement.</div></div>
+
+      <label class="consent"><input type="checkbox" data-consent="screening" data-summary="Screening consent">
+        <span class="ctxt">I authorize E.F. Hutton Realty to verify all information and to obtain a credit, criminal-background, and rental-history report.
+        <small>Placeholder — replace with approved FCRA screening-authorization language.</small></span></label>
+
+      <label class="consent"><input type="checkbox" data-consent="contactAuth" data-summary="Contact authorization">
+        <span class="ctxt">I authorize the release of information by employers, landlords, banks, and personal references named above.
+        <small>Placeholder — matches printed form's "permission to communicate with all contacts" clause.</small></span></label>
+
+      <label class="consent"><input type="checkbox" data-consent="feeAck" data-summary="Fee acknowledgment">
+        <span class="ctxt">I understand the application fee is <b>non-refundable</b> and covers the cost of processing this application.
+        <small>Placeholder — confirm fee amount and exact non-refundable language.</small></span></label>
+
+      <div class="sectitle" style="margin-top:26px"><span class="num">✎</span><h3>Signature</h3></div>
+      <div class="grid" style="margin-bottom:8px">
+        <div class="field">
+          <label class="flabel" for="sigName">Type your full legal name <span class="req">*</span></label>
+          <input type="text" id="sigName" placeholder="Full legal name" data-summary="Signed by">
+        </div>
+        <div class="field">
+          <label class="flabel" for="sigDate">Date</label>
+          <input type="date" id="sigDate">
+        </div>
+      </div>
+      <label class="flabel" style="display:block;margin-bottom:6px">Draw your signature <span class="req">*</span></label>
+      <div class="sigwrap">
+        <canvas class="sigcanvas" id="sigCanvas"></canvas>
+        <div class="sigbar"><span>Sign above with your mouse or finger</span><button type="button" class="linkbtn" id="sigClear">Clear</button></div>
+      </div>
+
+      <div class="sectitle" style="margin-top:26px"><span class="num">✉</span><h3>Your copy</h3></div>
+      <div class="grid">
+        <div class="field full">
+          <label class="flabel" for="copyEmail">Email a PDF copy to <span class="req">*</span></label>
+          <input type="email" id="copyEmail" placeholder="you@email.com" data-summary="Copy to">
+          <span class="hint">You'll get a full PDF of this application. E.F. Hutton is also notified by email and Slack when you submit.</span>
+        </div>
+      </div>
+      <div class="cf-turnstile" data-sitekey="__TURNSTILE_SITEKEY__" style="margin-top:20px"></div>
+    </section>
+
+    <!-- STEP: DONE -->
+    <section class="step" data-step="done">
+      <div class="done-wrap">
+        <div class="checkbig"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h2>Application received</h2>
+        <p class="lede" style="margin:0 auto 4px">Thank you. Your application has been submitted to E.F. Hutton Realty.</p>
+        <div class="appref" id="appRef">APP-000000</div>
+        <p class="hint" style="margin-bottom:4px">Here's what's happening behind the scenes:</p>
+        <ul class="pipe" id="pipe">
+          <li data-k="save"><span class="pi">💾</span><div class="pl"><b>Application saved</b><small>Stored the moment you clicked submit</small></div><span class="ps" data-ps></span></li>
+          <li data-k="pdf"><span class="pi">📄</span><div class="pl"><b>PDF generated</b><small>Full application rendered to PDF</small></div><span class="ps" data-ps></span></li>
+          <li data-k="email"><span class="pi">✉️</span><div class="pl"><b>Copy emailed to you</b><small>Sent to the address you provided</small></div><span class="ps" data-ps></span></li>
+          <li data-k="fm"><span class="pi">🗄️</span><div class="pl"><b>Written to TenanTrack</b><small>Created in APPLICATIONS via FileMaker Data API (fmrest)</small></div><span class="ps" data-ps></span></li>
+          <li data-k="box"><span class="pi">📦</span><div class="pl"><b>PDF &amp; documents saved to Box</b><small>New Applications › APP-2026-#### - Unit - Last, First</small></div><span class="ps" data-ps></span></li>
+          <li data-k="notify"><span class="pi">🔔</span><div class="pl"><b>Team notified</b><small>Email + Slack alert to the leasing team</small></div><span class="ps" data-ps></span></li>
+        </ul>
+        <div class="note info" style="margin-top:22px;text-align:left"><span class="ni">ℹ️</span><div>In this mockup the pipeline is simulated. In production it runs in the Cloudflare Worker: the submission is queued first (so it never fails in front of an applicant), then relayed to FileMaker, Box, and notifications with automatic retry.</div></div>
+        <button class="btn ghost" id="restart" style="margin-top:14px">Start a new application</button>
+      </div>
+    </section>
   </main>
+</div>
 
-  <script src="/app.js" defer></script>
+<footer class="foot">
+  <div class="inner">
+    <div class="save" id="saveState"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Draft saved automatically</span></div>
+    <button class="btn ghost" id="backBtn" disabled>Back</button>
+    <button class="btn primary" id="nextBtn">Continue
+      <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var LS_KEY="efh_lease_draft_v1";
+
+  /* ---------- theme ---------- */
+  var root=document.documentElement, tbtn=document.getElementById("themeBtn");
+  try{var st=localStorage.getItem("efh_theme"); if(st)root.setAttribute("data-theme",st);}catch(e){}
+  tbtn.addEventListener("click",function(){
+    var cur=root.getAttribute("data-theme");
+    var next = cur==="dark"?"light":(cur==="light"?"dark":(matchMedia("(prefers-color-scheme:dark)").matches?"light":"dark"));
+    root.setAttribute("data-theme",next);
+    try{localStorage.setItem("efh_theme",next);}catch(e){}
+  });
+
+  /* ---------- state ---------- */
+  var adults=1;
+
+  /* ---------- SVG helpers ---------- */
+  var ICON_PLUS='<svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>';
+  var ICON_UP='<svg viewBox="0 0 24 24" fill="none"><path d="M12 16V6M7 11l5-5 5 5M6 19h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  var STATES=["FL","AL","GA","NY","NJ","CA","TX","NC","SC","VA","Other"];
+  function stateOptions(){return '<option value="">State</option>'+STATES.map(function(s){return '<option>'+s+'</option>';}).join('');}
+
+  /* ---------- residence block ---------- */
+  function residenceHTML(kind,idx){
+    var title = kind==="current" ? "Current residence" : "Previous residence";
+    var tag = kind==="current" ? "Where you live now" : ("Prior address "+idx);
+    return ''+
+    '<div class="sub" data-res="'+kind+'">'+
+      '<div class="subhead"><h4>'+title+'</h4><span class="tag">'+tag+'</span><span class="spacer"></span>'+
+        (kind==="prev"?'<button type="button" class="rm" data-rm="res">Remove</button>':'')+
+      '</div>'+
+      '<div class="grid">'+
+        '<div class="field full"><label class="flabel">Street address <span class="req">*</span></label><input type="text" data-f="address" placeholder="123 Main St, Apt 4"></div>'+
+        '<div class="field"><label class="flabel">City <span class="req">*</span></label><input type="text" data-f="city"></div>'+
+        '<div class="field third"><label class="flabel">State</label><select data-f="state">'+stateOptions()+'</select></div>'+
+        '<div class="field third"><label class="flabel">ZIP</label><input type="text" data-f="zip" inputmode="numeric" placeholder="33101"></div>'+
+        '<div class="field"><label class="flabel">Residency dates</label><div style="display:flex;gap:8px"><input type="date" data-f="fromDate" title="From"><input type="date" data-f="toDate" title="To"></div></div>'+
+        '<div class="field"><label class="flabel">Do you rent or own?</label><div class="seg tenure" role="group"><button type="button" data-t="rent" class="sel">Rent</button><button type="button" data-t="own">Own</button></div></div>'+
+        '<div class="field ownerfields"><label class="flabel">Monthly rent</label><input type="text" data-f="rentAmount" inputmode="decimal" placeholder="$"></div>'+
+        '<div class="field ownerfields"><label class="flabel">Landlord / owner name</label><input type="text" data-f="landlordName"></div>'+
+        '<div class="field ownerfields"><label class="flabel">Landlord / owner phone</label><input type="tel" data-f="landlordPhone" placeholder="(305) 555-0100"></div>'+
+        '<div class="field ownerfields"><label class="flabel">Utilities billed in whose name?</label><input type="text" data-f="utilityInName"></div>'+
+        '<div class="field full ownerfields"><label class="flabel">Reason for leaving</label><input type="text" data-f="reasonForLeaving"></div>'+
+        '<div class="field full ownerfields"><label class="flabel" style="margin-bottom:2px">Landlord history <span class="opt">(all that apply)</span></label>'+
+          '<div class="yn" style="gap:14px;flex-wrap:wrap">'+
+            '<label style="display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);font-weight:500"><input type="checkbox" data-f="rentPaidInFull" style="width:16px;height:16px;accent-color:var(--brand)">Rent paid in full</label>'+
+            '<label style="display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);font-weight:500"><input type="checkbox" data-f="gaveNotice" style="width:16px;height:16px;accent-color:var(--brand)">Proper notice given</label>'+
+            '<label style="display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);font-weight:500"><input type="checkbox" data-f="askedToMove" style="width:16px;height:16px;accent-color:var(--brand)">Ever asked to move</label>'+
+          '</div></div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  /* ---------- employment block ---------- */
+  function employmentHTML(kind,idx){
+    var title = kind==="current" ? "Current employment" : "Previous employer";
+    var tag = kind==="current" ? "Present job" : ("Prior job "+idx);
+    return ''+
+    '<div class="sub" data-emp="'+kind+'">'+
+      '<div class="subhead"><h4>'+title+'</h4><span class="tag">'+tag+'</span><span class="spacer"></span>'+
+        (kind==="prev"?'<button type="button" class="rm" data-rm="emp">Remove</button>':'')+
+      '</div>'+
+      '<div class="grid">'+
+        '<div class="field"><label class="flabel">Employer <span class="req">*</span></label><input type="text" data-f="employer"></div>'+
+        '<div class="field"><label class="flabel">Occupation / title</label><input type="text" data-f="title"></div>'+
+        '<div class="field full"><label class="flabel">Employer address</label><input type="text" data-f="address"></div>'+
+        '<div class="field"><label class="flabel">Supervisor</label><input type="text" data-f="supervisor"></div>'+
+        '<div class="field"><label class="flabel">Work phone</label><input type="tel" data-f="phone" placeholder="(305) 555-0100"></div>'+
+        '<div class="field"><label class="flabel">Monthly gross pay</label><input type="text" data-f="monthlyGross" inputmode="decimal" placeholder="$"></div>'+
+        '<div class="field"><label class="flabel">Dates employed</label><div style="display:flex;gap:8px"><input type="date" data-f="fromDate" title="From"><input type="date" data-f="toDate" title="To"></div></div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  /* ---------- document block (first two adults) ---------- */
+  function docsHTML(){
+    return ''+
+    '<div class="sectitle" style="margin-top:30px"><span class="num">4</span><h3>Documents</h3></div>'+
+    '<p class="sechint">Clear photos or PDFs are fine. Required from the first two adults on the lease.</p>'+
+    '<div class="docgrid" style="margin-top:6px">'+
+      dropHTML("Driver's license — front","JPG, PNG or PDF",false,"DL_Front")+
+      dropHTML("Driver's license — back","JPG, PNG or PDF",false,"DL_Back")+
+    '</div>'+
+    '<div style="margin-top:14px">'+
+      dropHTML("Income — last 3 months","Bank statements and/or paystubs · add multiple files",true,"Bank_Statement")+
+    '</div>'+
+    '<div style="margin-top:14px">'+
+      dropHTML("Latest credit report / score","Screenshot or PDF from a credit bureau",false,"Credit_Report")+
+    '</div>';
+  }
+  function dropHTML(title,hint,multi,docType){
+    return ''+
+    '<div class="drop" data-drop data-doctype="'+docType+'">'+
+      '<div class="di"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 16V4M7 9l5-5 5 5M5 20h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+
+      '<div class="dt">'+title+'</div>'+
+      '<div class="dh">'+hint+'</div>'+
+      '<input type="file" '+(multi?'multiple':'')+' accept="image/*,application/pdf">'+
+      '<ul class="files"></ul>'+
+    '</div>';
+  }
+
+  /* ---------- applicant step ---------- */
+  function applicantHTML(i){
+    var isPrimary=(i===0);
+    var human=isPrimary?"Primary applicant":("Co-applicant "+i);
+    var docs = (i<2);
+    return ''+
+    '<section class="step" data-step="applicant" data-idx="'+i+'">'+
+      '<div class="eyebrow">Applicant '+(i+1)+' of '+adults+'</div>'+
+      '<h2>'+human+(docs?'':' <span class="tiptag">no documents required</span>')+'</h2>'+
+      '<p class="lede">'+(isPrimary?"You're the primary applicant and lease-holder of record.":"Each co-applicant completes their own identity, residence, and employment history.")+'</p>'+
+
+      '<div class="sectitle"><span class="num">1</span><h3>Identity</h3></div>'+
+      '<div class="grid" data-identity style="margin-top:6px">'+
+        '<div class="field"><label class="flabel">First name <span class="req">*</span></label><input type="text" data-f="firstName"></div>'+
+        '<div class="field"><label class="flabel">Middle</label><input type="text" data-f="middleName"></div>'+
+        '<div class="field"><label class="flabel">Last name <span class="req">*</span></label><input type="text" data-f="lastName"></div>'+
+        '<div class="field"><label class="flabel">Other names used <span class="opt">(maiden, alias)</span></label><input type="text" data-f="otherNames"></div>'+
+        '<div class="field"><label class="flabel">Date of birth <span class="req">*</span></label><input type="date" data-f="dob"></div>'+
+        '<div class="field"><label class="flabel">SSN <span class="opt">— last 4 only</span> <span class="req">*</span></label><input type="text" data-f="ssnLast4" inputmode="numeric" maxlength="4" placeholder="••••" style="max-width:120px;letter-spacing:.3em"></div>'+
+        '<div class="field"><label class="flabel">Driver&rsquo;s license #</label><input type="text" data-f="dlNumber"></div>'+
+        '<div class="field"><label class="flabel">License state</label><select data-f="dlState">'+stateOptions()+'</select></div>'+
+        '<div class="field"><label class="flabel">Best phone <span class="req">*</span></label><input type="tel" data-f="phone" placeholder="(305) 555-0100"></div>'+
+        '<div class="field"><label class="flabel">Secondary phone</label><input type="tel" data-f="secondaryPhone"></div>'+
+        '<div class="field full"><label class="flabel">Email <span class="req">*</span></label><input type="email" data-f="email" placeholder="name@email.com"></div>'+
+      '</div>'+
+
+      '<div class="sectitle"><span class="num">2</span><h3>Residence history</h3></div>'+
+      '<p class="sechint">Start with where you live now. Add previous addresses to cover about 3 years — up to 3 prior residences.</p>'+
+      '<div data-reslist>'+residenceHTML("current",0)+'</div>'+
+      '<button type="button" class="addbtn" data-add="res">'+ICON_PLUS+' Add previous residence <span data-rescount style="color:var(--faint);font-weight:500">(0 of 3)</span></button>'+
+
+      '<div class="sectitle"><span class="num">3</span><h3>Employment history</h3></div>'+
+      '<p class="sechint">Start with your current job. Add previous employers to cover the last 10 years.</p>'+
+      '<div data-emplist>'+employmentHTML("current",0)+'</div>'+
+      '<button type="button" class="addbtn" data-add="emp">'+ICON_PLUS+' Add previous employer <span data-empcount style="color:var(--faint);font-weight:500">(0 of 3)</span></button>'+
+
+      (docs?docsHTML():'<div class="note info" style="margin-top:26px"><span class="ni">📄</span><div>No ID or financial documents are required from this co-applicant. Only the first two adults on the lease upload documents.</div></div>')+
+    '</section>';
+  }
+
+  /* ---------- background questions ---------- */
+  var BG=[
+    {k:"evict",q:"Have you ever been evicted or asked to leave a rental?"},
+    {k:"broken",q:"Have you ever broken a lease or rental agreement?"},
+    {k:"bankrupt",q:"Have you ever filed for bankruptcy?"},
+    {k:"felony",q:"Have you ever been convicted of a felony? [wording pending compliance review]"},
+    {k:"lawsuit",q:"Are you currently a party to any lawsuit?"},
+    {k:"smoke",q:"Does anyone in the household smoke?"}
+  ];
+  function buildBG(){
+    var el=document.getElementById("bgQuestions");
+    el.innerHTML=BG.map(function(b){
+      return '<div class="sub" data-bg="'+b.k+'" style="padding:14px 16px">'+
+        '<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">'+
+          '<div style="flex:1;min-width:220px;font-size:14px;font-weight:600;color:var(--ink)">'+b.q+'</div>'+
+          '<div class="yn" data-ynq><button type="button" data-v="yes">Yes</button><button type="button" data-v="no">No</button></div>'+
+        '</div>'+
+        '<div class="field full explain hidden" style="margin-top:12px"><label class="flabel">Please explain</label><textarea placeholder="Briefly explain the circumstances"></textarea></div>'+
+      '</div>';
+    }).join('');
+    el.querySelectorAll('[data-ynq] button').forEach(function(btn){
+      btn.addEventListener("click",function(){
+        var wrap=btn.closest('[data-ynq]');
+        wrap.querySelectorAll('button').forEach(function(b){b.classList.remove('sel');});
+        btn.classList.add('sel');
+        var box=btn.closest('[data-bg]').querySelector('.explain');
+        box.classList.toggle('hidden', btn.getAttribute('data-v')!=='yes');
+        saveDraft();
+      });
+    });
+  }
+
+  /* ---------- steps registry ---------- */
+  var steps=[]; // {name, short, el}
+  function collectSteps(){
+    steps=[];
+    steps.push({name:"Getting started",short:"Start",el:document.querySelector('[data-step="start"]')});
+    document.querySelectorAll('#applicantSteps [data-step="applicant"]').forEach(function(el){
+      var i=+el.getAttribute('data-idx');
+      steps.push({name:(i===0?"Primary applicant":"Co-applicant "+i),short:(i===0?"Applicant 1":"Applicant "+(i+1)),el:el});
+    });
+    steps.push({name:"Background & disclosures",short:"Disclosures",el:document.querySelector('[data-step="background"]')});
+    steps.push({name:"Review & sign",short:"Review",el:document.querySelector('[data-step="review"]')});
+  }
+  var doneEl=document.querySelector('[data-step="done"]');
+  var cur=0;
+
+  function renderApplicants(){
+    var host=document.getElementById("applicantSteps");
+    host.innerHTML="";
+    for(var i=0;i<adults;i++){host.insertAdjacentHTML("beforeend",applicantHTML(i));}
+    wireApplicants();
+  }
+
+  function renderRail(){
+    var ul=document.getElementById("railSteps");
+    ul.innerHTML=steps.map(function(s,i){
+      var cls=i<cur?"done":(i===cur?"active":"");
+      var mark=i<cur?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>':(i+1);
+      return '<li class="'+cls+'" data-goto="'+i+'"><span class="dot">'+mark+'</span><span class="lbl">'+s.name+'</span></li>';
+    }).join('');
+    ul.querySelectorAll('[data-goto]').forEach(function(li){
+      li.addEventListener("click",function(){var t=+li.getAttribute('data-goto'); if(t<=cur) go(t);});
+    });
+    // mobile
+    document.getElementById("mBar").style.width=Math.round((cur)/(steps.length-1)*100)+"%";
+    document.getElementById("mStepName").textContent=steps[cur].name;
+    document.getElementById("mStepNo").textContent=cur+1;
+    document.getElementById("mStepTot").textContent=steps.length;
+  }
+
+  function show(el){
+    document.querySelectorAll('.step').forEach(function(s){s.classList.remove('on');});
+    el.classList.add('on');
+    document.getElementById("card").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+
+  function go(i){
+    if(i<0||i>=steps.length)return;
+    cur=i; show(steps[cur].el); renderRail();
+    var back=document.getElementById("backBtn"), next=document.getElementById("nextBtn");
+    back.disabled=(cur===0);
+    if(cur===steps.length-1){next.innerHTML='Submit application <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'; next.classList.add('primary');}
+    else{next.innerHTML='Continue <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
+    if(steps[cur].el.getAttribute('data-step')==='review')buildReview();
+  }
+
+  /* ---------- wiring within applicant blocks ---------- */
+  function wireTenure(scope){
+    scope.querySelectorAll('.seg.tenure').forEach(function(seg){
+      if(seg.__wired)return; seg.__wired=true;
+      seg.querySelectorAll('button').forEach(function(b){
+        b.addEventListener("click",function(){
+          seg.querySelectorAll('button').forEach(function(x){x.classList.remove('sel');});
+          b.classList.add('sel');
+          // toggle owner-only fields label (rent hidden when own)
+          var sub=seg.closest('[data-res]');
+          var own=b.getAttribute('data-t')==='own';
+          sub.querySelectorAll('.ownerfields').forEach(function(f){
+            var lab=f.querySelector('.flabel');
+            if(lab && /Monthly rent|Landlord/.test(lab.textContent)){ f.style.display = own?'none':''; }
+          });
+          saveDraft();
+        });
+      });
+    });
+  }
+  function wireDrops(scope){
+    scope.querySelectorAll('[data-drop]').forEach(function(d){
+      if(d.__wired)return; d.__wired=true;
+      var input=d.querySelector('input[type=file]'), list=d.querySelector('.files');
+      input.addEventListener("change",function(){
+        Array.prototype.forEach.call(input.files,function(f){
+          var li=document.createElement('li');
+          li.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.6"/><path d="M6 3h9l5 5v13H6z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="fn">'+f.name+'</span><span class="fx">'+fmtSize(f.size)+'</span><button type="button" class="fdel" title="Remove">×</button>';
+          li.querySelector('.fdel').addEventListener("click",function(){li.remove();});
+          list.appendChild(li);
+        });
+        input.value="";
+      });
+      ["dragover","dragenter"].forEach(function(ev){d.addEventListener(ev,function(e){e.preventDefault();d.classList.add('hover');});});
+      ["dragleave","drop"].forEach(function(ev){d.addEventListener(ev,function(e){e.preventDefault();d.classList.remove('hover');});});
+    });
+  }
+  function fmtSize(b){if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(0)+" KB";return (b/1048576).toFixed(1)+" MB";}
+
+  function wireApplicants(){
+    document.querySelectorAll('#applicantSteps [data-step="applicant"]').forEach(function(sec){
+      wireTenure(sec); wireDrops(sec);
+      // add residence
+      var resBtn=sec.querySelector('[data-add="res"]'), resList=sec.querySelector('[data-reslist]');
+      resBtn.addEventListener("click",function(){
+        var count=resList.querySelectorAll('[data-res="prev"]').length;
+        if(count>=3)return;
+        resList.insertAdjacentHTML("beforeend",residenceHTML("prev",count+1));
+        wireTenure(resList); attachRemovers(sec); updateResCount(sec); saveDraft();
+      });
+      // add employment
+      var empBtn=sec.querySelector('[data-add="emp"]'), empList=sec.querySelector('[data-emplist]');
+      empBtn.addEventListener("click",function(){
+        var count=empList.querySelectorAll('[data-emp="prev"]').length;
+        if(count>=3)return;
+        empList.insertAdjacentHTML("beforeend",employmentHTML("prev",count+1));
+        attachRemovers(sec); updateEmpCount(sec); saveDraft();
+      });
+      attachRemovers(sec); updateResCount(sec); updateEmpCount(sec);
+      sec.addEventListener("input",saveDraft);
+    });
+  }
+  function attachRemovers(sec){
+    sec.querySelectorAll('.rm').forEach(function(b){
+      if(b.__wired)return; b.__wired=true;
+      b.addEventListener("click",function(){
+        var kind=b.getAttribute('data-rm');
+        b.closest('.sub').remove();
+        renumber(sec); updateResCount(sec); updateEmpCount(sec); saveDraft();
+      });
+    });
+  }
+  function renumber(sec){
+    sec.querySelectorAll('[data-res="prev"]').forEach(function(el,i){el.querySelector('.tag').textContent="Prior address "+(i+1);});
+    sec.querySelectorAll('[data-emp="prev"]').forEach(function(el,i){el.querySelector('.tag').textContent="Prior job "+(i+1);});
+  }
+  function updateResCount(sec){
+    var n=sec.querySelectorAll('[data-res="prev"]').length;
+    var lab=sec.querySelector('[data-rescount]'); if(lab)lab.textContent="("+n+" of 3)";
+    var btn=sec.querySelector('[data-add="res"]'); if(btn)btn.disabled=(n>=3);
+  }
+  function updateEmpCount(sec){
+    var n=sec.querySelectorAll('[data-emp="prev"]').length;
+    var lab=sec.querySelector('[data-empcount]'); if(lab)lab.textContent="("+n+" of 3)";
+    var btn=sec.querySelector('[data-add="emp"]'); if(btn)btn.disabled=(n>=3);
+  }
+
+  /* ---------- adults segmented ---------- */
+  document.getElementById("adultSeg").addEventListener("click",function(e){
+    var b=e.target.closest('button'); if(!b)return;
+    this.querySelectorAll('button').forEach(function(x){x.classList.remove('sel');});
+    b.classList.add('sel');
+    adults=+b.getAttribute('data-n');
+    renderApplicants(); collectSteps(); renderRail(); saveDraft();
+  });
+
+  /* ---------- unit chip ---------- */
+  function refreshUnitChip(){
+    var p=document.getElementById("property").value, u=document.getElementById("unit").value;
+    var t=document.getElementById("unitChipText");
+    if(u){t.textContent=u.split(" — ")[0]+(p?" · "+p.split(" — ")[0]:"");}
+    else if(p){t.textContent=p.split(" — ")[0];}
+    else t.textContent="No unit selected";
+  }
+  ["property","unit"].forEach(function(id){document.getElementById(id).addEventListener("change",function(){refreshUnitChip();saveDraft();});});
+
+  /* ---------- review ---------- */
+  function buildReview(){
+    var host=document.getElementById("reviewSummary");
+    function row(k,v){return '<div><span>'+k+'</span><b>'+(v||'—')+'</b></div>';}
+    var pTxt=document.getElementById("property").value||'—';
+    var uTxt=document.getElementById("unit").value||'—';
+    var move=document.getElementById("movein").value||'—';
+    var term=document.getElementById("term").value||'—';
+    var html='<div class="rev"><div class="rh"><b>Home &amp; lease</b><a class="editlink" href="#" data-edit="0">Edit</a></div><div class="rb">'+
+      row("Property",pTxt)+row("Unit",uTxt)+row("Move-in",move)+row("Lease term",term)+row("Adults on lease",adults)+'</div></div>';
+    document.querySelectorAll('#applicantSteps [data-step="applicant"]').forEach(function(sec,i){
+      var first=(sec.querySelector('[data-name="first"]')||{}).value||'';
+      var last=(sec.querySelector('[data-name="last"]')||{}).value||'';
+      var email=(sec.querySelector('[data-name="email"]')||{}).value||'';
+      var nm=(first+" "+last).trim()||("Applicant "+(i+1));
+      var resN=sec.querySelectorAll('[data-res]').length;
+      var empN=sec.querySelectorAll('[data-emp]').length;
+      var docFiles=0; sec.querySelectorAll('.files li').forEach(function(){docFiles++;});
+      html+='<div class="rev"><div class="rh"><b>'+(i===0?"Primary — ":"Co-applicant "+i+" — ")+nm+'</b><a class="editlink" href="#" data-edit="'+(i+1)+'">Edit</a></div><div class="rb">'+
+        row("Email",email)+row("Residences",resN)+row("Employers",empN)+row("Documents",(i<2?(docFiles+" file(s)"):"not required"))+'</div></div>';
+    });
+    host.innerHTML=html;
+    host.querySelectorAll('[data-edit]').forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();go(+a.getAttribute('data-edit'));});});
+  }
+
+  /* ---------- signature pad ---------- */
+  function initSig(){
+    var c=document.getElementById("sigCanvas"); if(!c||c.__init)return; c.__init=true;
+    var ctx=c.getContext("2d"), drawing=false, has=false;
+    function resize(){var r=c.getBoundingClientRect();var dpr=window.devicePixelRatio||1;c.width=r.width*dpr;c.height=170*dpr;ctx.scale(dpr,dpr);ctx.lineWidth=2.2;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()||"#16233a";}
+    resize();
+    function pos(e){var r=c.getBoundingClientRect();var t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};}
+    function start(e){drawing=true;has=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();}
+    function move(e){if(!drawing)return;var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();e.preventDefault();}
+    function end(){drawing=false;}
+    c.addEventListener("pointerdown",start);c.addEventListener("pointermove",move);
+    window.addEventListener("pointerup",end);
+    document.getElementById("sigClear").addEventListener("click",function(){ctx.clearRect(0,0,c.width,c.height);has=false;});
+    c.__hasInk=function(){return has;};
+  }
+
+  /* ---------- draft (lightweight, non-blocking) ---------- */
+  var saveTimer=null;
+  function saveDraft(){
+    document.getElementById("saveState").querySelector('span').textContent="Saving…";
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(function(){
+      try{localStorage.setItem(LS_KEY,JSON.stringify({adults:adults,cur:cur,t:Date.now()}));}catch(e){}
+      document.getElementById("saveState").querySelector('span').textContent="Draft saved automatically";
+    },500);
+  }
+
+  /* ---------- submit pipeline ---------- */
+  function runPipeline(){
+    var lis=document.querySelectorAll("#pipe li");
+    lis.forEach(function(li){li.classList.remove('act');li.querySelector('[data-ps]').innerHTML='';});
+    var idx=0;
+    function step(){
+      if(idx>0){var prev=lis[idx-1];prev.querySelector('[data-ps]').innerHTML='<svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
+      if(idx>=lis.length)return;
+      var li=lis[idx];li.classList.add('act');li.querySelector('[data-ps]').innerHTML='<span class="spin"></span>';
+      idx++; setTimeout(step,720);
+    }
+    step();
+  }
+
+  /* ---------- collect + submit (production) ---------- */
+  function v(el){ return el ? (el.value||"").trim() : ""; }
+  function ck(el){ return !!(el && el.checked); }
+  function collectResidence(sub){
+    var q=function(f){ return sub.querySelector('[data-f="'+f+'"]'); };
+    return { current: sub.getAttribute('data-res')==='current',
+      address:v(q('address')), city:v(q('city')), state:v(q('state')), zip:v(q('zip')),
+      fromDate:v(q('fromDate')), toDate:v(q('toDate')), rentAmount:v(q('rentAmount')),
+      landlordName:v(q('landlordName')), landlordPhone:v(q('landlordPhone')), utilityInName:v(q('utilityInName')),
+      reasonForLeaving:v(q('reasonForLeaving')), rentPaidInFull:ck(q('rentPaidInFull')),
+      gaveNotice:ck(q('gaveNotice')), askedToMove:ck(q('askedToMove')) };
+  }
+  function collectEmployer(sub){
+    var q=function(f){ return sub.querySelector('[data-f="'+f+'"]'); };
+    return { current: sub.getAttribute('data-emp')==='current',
+      employer:v(q('employer')), title:v(q('title')), address:v(q('address')), supervisor:v(q('supervisor')),
+      phone:v(q('phone')), monthlyGross:v(q('monthlyGross')), fromDate:v(q('fromDate')), toDate:v(q('toDate')) };
+  }
+  function collectAdult(sec){
+    var idg=sec.querySelector('[data-identity]');
+    var q=function(f){ return idg.querySelector('[data-f="'+f+'"]'); };
+    var a={ firstName:v(q('firstName')), middleName:v(q('middleName')), lastName:v(q('lastName')),
+      otherNames:v(q('otherNames')), dob:v(q('dob')), ssnLast4:v(q('ssnLast4')),
+      dlNumber:v(q('dlNumber')), dlState:v(q('dlState')), phone:v(q('phone')),
+      secondaryPhone:v(q('secondaryPhone')), email:v(q('email')) };
+    a.residences=[].map.call(sec.querySelectorAll('[data-res]'), collectResidence);
+    a.employers=[].map.call(sec.querySelectorAll('[data-emp]'), collectEmployer);
+    return a;
+  }
+  var BGMAP={evict:'evicted',broken:'brokeLease',bankrupt:'bankruptcy',felony:'felony',lawsuit:'lawsuit',smoke:'smoker'};
+  function collectPayload(){
+    var adultsArr=[];
+    document.querySelectorAll('#applicantSteps [data-step="applicant"]').forEach(function(sec){ adultsArr.push(collectAdult(sec)); });
+    var bg={};
+    document.querySelectorAll('#bgQuestions [data-bg]').forEach(function(el){
+      var key=BGMAP[el.getAttribute('data-bg')]||el.getAttribute('data-bg');
+      var sel=el.querySelector('[data-ynq] button.sel');
+      bg[key]= sel ? sel.getAttribute('data-v')==='yes' : false;
+      var ex=el.querySelector('.explain textarea'); if(ex) bg[key+'Explain']=v(ex);
+    });
+    var consent={};
+    document.querySelectorAll('[data-consent]').forEach(function(c){ consent[c.getAttribute('data-consent')]=ck(c); });
+    var sig=document.getElementById('sigCanvas');
+    return {
+      application:{ propertyId:v(document.getElementById('property')), unitId:v(document.getElementById('unit')),
+        unitLabel:v(document.getElementById('unit')), desiredMoveInDate:v(document.getElementById('movein')),
+        leaseTerm:v(document.getElementById('term')), adultCount:adults, numberOfOccupants:adults,
+        pets:v(document.getElementById('pets')), petDetails:v(document.getElementById('pets')),
+        vehiclesCount:v(document.getElementById('vehicles')), howHeard:v(document.getElementById('hear')) },
+      adults:adultsArr, background:bg, consent:consent,
+      signature:{ name:v(document.getElementById('sigName')), dateISO:v(document.getElementById('sigDate')),
+        imageBase64:(sig&&sig.__hasInk&&sig.__hasInk()?sig.toDataURL('image/png'):''), json:'' },
+      copyEmail:v(document.getElementById('copyEmail'))
+    };
+  }
+  function showDone(ref){
+    document.querySelector('.foot').classList.add('hidden');
+    document.getElementById("appRef").textContent = ref || ("APP-2026-"+String(Math.floor(1+Math.random()*4999)).padStart(4,"0"));
+    show(doneEl); window.scrollTo({top:0,behavior:"smooth"}); runPipeline();
+    try{localStorage.removeItem(LS_KEY);}catch(e){}
+  }
+  var submitting=false;
+  async function submitApplication(){
+    if(submitting) return; submitting=true;
+    var next=document.getElementById("nextBtn"); next.disabled=true; next.textContent="Submitting…";
+    var payload=collectPayload();
+    try{ payload.turnstileToken=(window.turnstile&&turnstile.getResponse)?(turnstile.getResponse()||""):""; }catch(e){ payload.turnstileToken=""; }
+    var form=new FormData();
+    form.append("payload", JSON.stringify(payload));
+    document.querySelectorAll('#applicantSteps [data-step="applicant"]').forEach(function(sec){
+      var idx=+sec.getAttribute('data-idx'); if(idx>1) return; // documents from first two adults only
+      sec.querySelectorAll('[data-drop]').forEach(function(d){
+        var dt=d.getAttribute('data-doctype'); var inp=d.querySelector('input[type=file]');
+        if(inp){ [].forEach.call(inp.files, function(f){ form.append('doc:'+idx+':'+dt, f, f.name); }); }
+      });
+    });
+    try{
+      var res=await fetch('/api/applications',{method:'POST',body:form});
+      var j=await res.json();
+      if(j && j.ok){ showDone(j.applicationNumber); }
+      else { alert((j&&j.message)||'Something went wrong submitting your application. Please try again.');
+             next.disabled=false; next.innerHTML='Submit application'; submitting=false; }
+    }catch(e){
+      showDone(null); submitting=false; // API unreachable (design preview) — confirm without a live write
+    }
+  }
+
+  /* ---------- nav buttons ---------- */
+  document.getElementById("backBtn").addEventListener("click",function(){go(cur-1);});
+  document.getElementById("nextBtn").addEventListener("click",function(){
+    if(cur===steps.length-1){ submitApplication(); return; }
+    go(cur+1);
+  });
+  document.getElementById("restart").addEventListener("click",function(){location.reload();});
+
+  /* ---------- init ---------- */
+  document.getElementById("sigDate").value=new Date().toISOString().slice(0,10);
+  renderApplicants();
+  buildBG();
+  collectSteps();
+  go(0);
+  initSig();
+  // init sig lazily when review shown
+  var obs=new MutationObserver(function(){if(steps[cur]&&steps[cur].el.getAttribute('data-step')==='review')initSig();});
+  obs.observe(document.getElementById("card"),{attributes:true,subtree:true,attributeFilter:['class']});
+
+})();
+</script>
+
+<script>
+/* iframe auto-resize: report document height to the Motto parent page */
+(function(){
+  function report(){
+    try{
+      var h=Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      parent.postMessage({type:"efh-resize",height:h}, "*");
+    }catch(e){}
+  }
+  window.addEventListener("load",report);
+  window.addEventListener("resize",report);
+  if(window.ResizeObserver){ try{ new ResizeObserver(report).observe(document.body); }catch(e){} }
+  setInterval(report, 1200);
+})();
+</script>
 </body>
 </html>

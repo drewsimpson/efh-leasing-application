@@ -1,11 +1,26 @@
 name = "efh-leasing-application"
 main = "src/index.js"
-compatibility_date = "2026-08-28"
+compatibility_date = "2026-09-01"
 
-[assets]
-directory = "./public"
-binding = "ASSETS"
+# Static form (the approved mockup, wired to POST /api/applications) lives in ./public
+assets = { directory = "./public", binding = "ASSETS" }
 
+# Non-secret vars (safe to commit)
 [vars]
-APP_ENV = "development"
+APP_ENV = "production"
 PUBLIC_PARENT_ORIGIN = "https://www.efhuttonrealty.com"
+FM_HOST = "fms.tek.work"
+FM_DATABASE = "EFH_PM_TenanTTrak_v3"
+BOX_NEW_APPS_FOLDER_ID = "410696406003"
+BOX_SUBJECT_TYPE = "enterprise"
+
+# ---------------------------------------------------------------------------
+# SECRETS — set with `wrangler secret put <NAME>` (never commit these):
+#   FM_USERNAME          web.api account (WEB_API privilege set, [fmrest])
+#   FM_PASSWORD
+#   BOX_CLIENT_ID        Box app (Client Credentials Grant / service account)
+#   BOX_CLIENT_SECRET
+#   BOX_SUBJECT_ID       Box enterprise id (or user id if BOX_SUBJECT_TYPE=user)
+#   SLACK_WEBHOOK_URL    Slack incoming webhook for #leasing
+#   TURNSTILE_SECRET     Cloudflare Turnstile secret key (bot protection)
+# ---------------------------------------------------------------------------
