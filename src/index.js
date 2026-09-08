@@ -31,8 +31,8 @@ function appNumber() {
 }
 const DOC_TYPES = ["DL_Front", "DL_Back", "Bank_Statement", "Paystub", "Credit_Report"];
 
-// Lease term options offered on the form (CUSTOM — confirm/adjust this list).
-const LEASE_TERMS = ["12 months", "18 months", "24 months", "Month-to-month"];
+// Lease term options offered on the form.
+const LEASE_TERMS = ["6 months", "12 months", "18 months"];
 
 // GET /api/catalog — live Property + vacant Unit lists from FileMaker for the form dropdowns.
 async function handleCatalog(env) {
@@ -40,8 +40,10 @@ async function handleCatalog(env) {
   try {
     await fm.login();
     const props = await fm.getRecords("API_PROPERTY", { limit: 500 });
-    // vacant = no current tenant (c_CurrentTenant empty)
-    const vacantUnits = await fm.findRecords("API_UNIT", [{ c_CurrentTenant: "=" }], { limit: 1000 });
+    // Available = officially Vacant AND no tenant assigned. Using OccupancyStatus (the
+    // authoritative field the vacate/occupy scripts set) excludes units already booked or
+    // with a future move-in — those keep a _fk_TenantID even when c_CurrentTenant reads empty.
+    const vacantUnits = await fm.findRecords("API_UNIT", [{ OccupancyStatus: "==Vacant", _fk_TenantID: "=" }], { limit: 1000 });
     const num = (v) => Number(String(v ?? "").replace(/[^0-9.]/g, "")) || 0;
     const units = vacantUnits
       .map((u) => {
