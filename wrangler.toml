@@ -1,6 +1,7 @@
 name = "efh-leasing-application"
 main = "src/index.js"
 compatibility_date = "2026-09-01"
+keep_vars = true
 
 # Static form (the approved mockup, wired to POST /api/applications) lives in ./public
 assets = { directory = "./public", binding = "ASSETS" }
