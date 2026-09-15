@@ -12,6 +12,7 @@ APP_ENV = "production"
 PUBLIC_PARENT_ORIGIN = "https://www.efhuttonrealty.com"
 FM_HOST = "fms.tek.work"
 FM_DATABASE = "EFH_PM_TenanTTrak_v3"
+FM_USERNAME = "cs.api"
 BOX_NEW_APPS_FOLDER_ID = "410696406003"
 BOX_SUBJECT_TYPE = "enterprise"
 
