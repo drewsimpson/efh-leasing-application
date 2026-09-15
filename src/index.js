@@ -246,6 +246,7 @@ async function handleApi(request, env) {
       boxConfigured: Boolean(env.BOX_CLIENT_ID && env.BOX_CLIENT_SECRET && env.BOX_NEW_APPS_FOLDER_ID),
       slackConfigured: Boolean(env.SLACK_WEBHOOK_URL),
       turnstileConfigured: Boolean(env.TURNSTILE_SECRET),
+      filemakerOnlyTestSupported: true,
     });
   }
   if (request.method === "GET" && url.pathname === "/api/catalog") {
