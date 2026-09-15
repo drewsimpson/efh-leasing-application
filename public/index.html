@@ -710,7 +710,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     back.disabled=(cur===0);
     if(cur===steps.length-1){next.innerHTML='Submit application <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'; next.classList.add('primary');}
     else{next.innerHTML='Continue <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
-    if(steps[cur].el.getAttribute('data-step')==='review')buildReview();
+    if(steps[cur].el.getAttribute('data-step')==='review'){buildReview();initSig();}
   }
 
   /* ---------- wiring within applicant blocks ---------- */
@@ -737,13 +737,22 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     scope.querySelectorAll('[data-drop]').forEach(function(d){
       if(d.__wired)return; d.__wired=true;
       var input=d.querySelector('input[type=file]'), list=d.querySelector('.files');
-      input.addEventListener("change",function(){
-        Array.prototype.forEach.call(input.files,function(f){
+      d.__files=[];
+      function renderFiles(){
+        list.innerHTML="";
+        d.__files.forEach(function(f,i){
           var li=document.createElement('li');
-          li.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.6"/><path d="M6 3h9l5 5v13H6z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="fn">'+f.name+'</span><span class="fx">'+fmtSize(f.size)+'</span><button type="button" class="fdel" title="Remove">×</button>';
-          li.querySelector('.fdel').addEventListener("click",function(){li.remove();});
+          li.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.6"/><path d="M6 3h9l5 5v13H6z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="fn"></span><span class="fx"></span><button type="button" class="fdel" title="Remove">×</button>';
+          li.querySelector('.fn').textContent=f.name;
+          li.querySelector('.fx').textContent=fmtSize(f.size);
+          li.querySelector('.fdel').addEventListener("click",function(){d.__files.splice(i,1);renderFiles();});
           list.appendChild(li);
         });
+      }
+      input.addEventListener("change",function(){
+        var selected=Array.prototype.slice.call(input.files||[]);
+        d.__files=input.multiple?d.__files.concat(selected):selected.slice(0,1);
+        renderFiles();
         input.value="";
       });
       ["dragover","dragenter"].forEach(function(ev){d.addEventListener(ev,function(e){e.preventDefault();d.classList.add('hover');});});
@@ -865,9 +874,9 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     var html='<div class="rev"><div class="rh"><b>Home &amp; lease</b><a class="editlink" href="#" data-edit="0">Edit</a></div><div class="rb">'+
       row("Property",pTxt)+row("Unit",uTxt)+row("Move-in",move)+row("Lease term",term)+row("Adults on lease",adults)+'</div></div>';
     document.querySelectorAll('#applicantSteps [data-step="applicant"]').forEach(function(sec,i){
-      var first=(sec.querySelector('[data-name="first"]')||{}).value||'';
-      var last=(sec.querySelector('[data-name="last"]')||{}).value||'';
-      var email=(sec.querySelector('[data-name="email"]')||{}).value||'';
+      var first=(sec.querySelector('[data-f="firstName"]')||{}).value||'';
+      var last=(sec.querySelector('[data-f="lastName"]')||{}).value||'';
+      var email=(sec.querySelector('[data-f="email"]')||{}).value||'';
       var nm=(first+" "+last).trim()||("Applicant "+(i+1));
       var resN=sec.querySelectorAll('[data-res]').length;
       var empN=sec.querySelectorAll('[data-emp]').length;
@@ -881,17 +890,30 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
   /* ---------- signature pad ---------- */
   function initSig(){
-    var c=document.getElementById("sigCanvas"); if(!c||c.__init)return; c.__init=true;
+    var c=document.getElementById("sigCanvas"); if(!c)return;
+    if(c.__init){if(c.__resize)c.__resize();return;} c.__init=true;
     var ctx=c.getContext("2d"), drawing=false, has=false;
-    function resize(){var r=c.getBoundingClientRect();var dpr=window.devicePixelRatio||1;c.width=r.width*dpr;c.height=170*dpr;ctx.scale(dpr,dpr);ctx.lineWidth=2.2;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()||"#16233a";}
+    function resize(){
+      var r=c.getBoundingClientRect(); if(r.width<1||r.height<1)return;
+      var dpr=window.devicePixelRatio||1, w=Math.round(r.width*dpr), h=Math.round(r.height*dpr);
+      if(c.width===w&&c.height===h)return;
+      var old=null;
+      if(has&&c.width&&c.height){old=document.createElement('canvas');old.width=c.width;old.height=c.height;old.getContext('2d').drawImage(c,0,0);}
+      c.width=w;c.height=h;ctx=c.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx.lineWidth=2.2;ctx.lineCap="round";ctx.lineJoin="round";
+      ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()||"#16233a";
+      if(old)ctx.drawImage(old,0,0,old.width,old.height,0,0,r.width,r.height);
+    }
+    c.__resize=resize;
     resize();
-    function pos(e){var r=c.getBoundingClientRect();var t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};}
-    function start(e){drawing=true;has=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();}
+    function pos(e){var r=c.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+    function start(e){if(e.pointerType==='mouse'&&e.button!==0)return;resize();drawing=true;has=true;if(c.setPointerCapture)c.setPointerCapture(e.pointerId);var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();}
     function move(e){if(!drawing)return;var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();e.preventDefault();}
-    function end(){drawing=false;}
+    function end(e){if(!drawing)return;drawing=false;if(e&&c.hasPointerCapture&&c.hasPointerCapture(e.pointerId))c.releasePointerCapture(e.pointerId);}
     c.addEventListener("pointerdown",start);c.addEventListener("pointermove",move);
-    window.addEventListener("pointerup",end);
-    document.getElementById("sigClear").addEventListener("click",function(){ctx.clearRect(0,0,c.width,c.height);has=false;});
+    c.addEventListener("pointerup",end);c.addEventListener("pointercancel",end);c.addEventListener("lostpointercapture",end);
+    window.addEventListener("resize",resize);
+    document.getElementById("sigClear").addEventListener("click",function(){var r=c.getBoundingClientRect();ctx.clearRect(0,0,r.width,r.height);has=false;});
     c.__hasInk=function(){return has;};
   }
 
@@ -997,8 +1019,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     document.querySelectorAll('#applicantSteps [data-step="applicant"]').forEach(function(sec){
       var idx=+sec.getAttribute('data-idx'); if(idx>1) return; // documents from first two adults only
       sec.querySelectorAll('[data-drop]').forEach(function(d){
-        var dt=d.getAttribute('data-doctype'); var inp=d.querySelector('input[type=file]');
-        if(inp){ [].forEach.call(inp.files, function(f){ form.append('doc:'+idx+':'+dt, f, f.name); }); }
+        var dt=d.getAttribute('data-doctype');
+        (d.__files||[]).forEach(function(f){ form.append('doc:'+idx+':'+dt, f, f.name); });
       });
     });
     try{
