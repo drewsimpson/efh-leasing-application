@@ -109,6 +109,8 @@ async function handleSubmission(request, env, ctx) {
   const applicantName = [primary.lastName, primary.firstName].filter(Boolean).join(", ");
   const unitLabel = payload?.application?.unitLabel || payload?.application?.unitId || "";
   const adultCount = payload?.application?.adultCount || payload?.adults?.length || 1;
+  const filemakerOnly = payload?.testMode === "filemaker-only"
+    && String(primary.otherNames || "").startsWith("TEST-LEASE-");
 
   const result = { ok: true, applicationNumber, steps: {} };
   const fm = new FileMaker(env);
@@ -120,6 +122,12 @@ async function handleSubmission(request, env, ctx) {
     const fieldData = buildFieldData(payload, { applicationNumber, ip });
     const recordId = await fm.createRecord("API_APPLICATIONS", fieldData);
     result.steps.filemaker = { ok: true, recordId };
+
+    // Controlled integration test: create only the FileMaker APPLICATIONS record.
+    // The TEST-LEASE marker prevents ordinary applicants from suppressing the downstream pipeline.
+    if (filemakerOnly) {
+      return json({ ok: true, applicationNumber, message: "FileMaker-only test application received.", testMode: true }, 200);
+    }
 
     // pull back the __pk_ApplicationID for child records (find by ApplicationNumber)
     const appPk = fieldData.ApplicationNumber; // Worker-generated; APP_DOCUMENTS keys off it

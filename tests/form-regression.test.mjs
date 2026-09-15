@@ -4,6 +4,7 @@ import test from "node:test";
 import { buildFieldData } from "../src/mapping.js";
 
 const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
+const worker = await readFile(new URL("../src/index.js", import.meta.url), "utf8");
 
 test("inline application script parses", () => {
   const script = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
@@ -44,4 +45,13 @@ test("working FileMaker mapping remains intact", () => {
   assert.equal(result.Email, "test@example.com");
   assert.equal(result.DesiredMoveInDate, "10/15/2026");
   assert.equal(result.TermsAndConditionsAccepted, 1);
+});
+
+test("FileMaker-only mode is limited to explicit synthetic test records", () => {
+  assert.match(worker, /payload\?\.testMode === "filemaker-only"/);
+  assert.match(worker, /startsWith\("TEST-LEASE-"\)/);
+  const gate = worker.indexOf("if (filemakerOnly)");
+  assert.ok(gate > worker.indexOf('fm.createRecord("API_APPLICATIONS"'));
+  assert.ok(gate < worker.indexOf("box.auth()"));
+  assert.ok(gate < worker.indexOf('fm.runScript("API_APPLICATIONS", "APP_EmailApplicant"'));
 });
