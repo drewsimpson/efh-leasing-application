@@ -435,7 +435,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <label class="flabel" style="display:block;margin-bottom:6px">Draw your signature <span class="req">*</span></label>
       <div class="sigwrap">
         <canvas class="sigcanvas" id="sigCanvas"></canvas>
-        <div class="sigbar"><span>Sign above with your mouse or finger</span><button type="button" class="linkbtn" id="sigClear">Clear</button></div>
+        <div class="sigbar"><span>Sign above with your mouse or finger</span><button type="button" class="linkbtn" id="sigDownload">Download signature PNG</button><button type="button" class="linkbtn" id="sigClear">Clear</button></div>
       </div>
 
       <div class="sectitle" style="margin-top:26px"><span class="num">✉</span><h3>Your copy</h3></div>
@@ -918,6 +918,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     c.addEventListener("pointerup",end);c.addEventListener("pointercancel",end);c.addEventListener("lostpointercapture",end);
     window.addEventListener("resize",resize);
     document.getElementById("sigClear").addEventListener("click",function(){var r=c.getBoundingClientRect();ctx.clearRect(0,0,r.width,r.height);has=false;});
+    document.getElementById("sigDownload").addEventListener("click",function(){if(!has)return;var a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='signature.png';document.body.appendChild(a);a.click();a.remove();});
     c.__hasInk=function(){return has;};
   }
 
