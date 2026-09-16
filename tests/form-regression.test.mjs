@@ -74,7 +74,7 @@ test("additional applicant fields map to FileMaker", () => {
   assert.equal(result.EmploymentStatus, "Employed Full-Time");
   assert.equal(result.CoApplicantEmploymentStatus, "Employed Part-Time");
   assert.equal(result.CurrentLandlordEmail, "current@example.com");
-  assert.equal(result.LandlordEmail, "previous1@example.com");
+  assert.equal(result.PreviousLandlordEmail, "previous1@example.com");
   assert.equal(result.Previous2LandlordEmail, "previous2@example.com");
   assert.equal(result.CoApplicantCurrentLandlordEmail, "co-current@example.com");
   assert.equal(result.CoApplicantPrevious1LandlordEmail, "co-previous1@example.com");
