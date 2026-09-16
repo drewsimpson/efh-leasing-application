@@ -46,6 +46,23 @@ export class FileMaker {
     if (code !== "0") throw new Error(`FM create on ${layout} failed (${code}): ${j?.messages?.[0]?.message}`);
     return j.response.recordId;
   }
+  async getRecord(layout, recordId) {
+    const r = await fetch(`${this.base}/layouts/${encodeURIComponent(layout)}/records/${encodeURIComponent(recordId)}`, { headers: this.headers() });
+    const j = await r.json();
+    const code = j?.messages?.[0]?.code;
+    if (code !== "0") throw new Error(`FM get record failed (${code})`);
+    return j.response.data[0].fieldData;
+  }
+  async uploadContainer(layout, recordId, field, file) {
+    const form = new FormData();
+    form.append("upload", file, file.name);
+    const r = await fetch(`${this.base}/layouts/${encodeURIComponent(layout)}/records/${encodeURIComponent(recordId)}/containers/${encodeURIComponent(field)}/1`, {
+      method: "POST", headers: { Authorization: `Bearer ${this.token}` }, body: form,
+    });
+    const j = await r.json();
+    const code = j?.messages?.[0]?.code;
+    if (code !== "0") throw new Error(`FM container upload failed (${code})`);
+  }
   // Run a server-side script; returns { scriptResult, scriptError }.
   async runScript(layout, scriptName, param) {
     const url =

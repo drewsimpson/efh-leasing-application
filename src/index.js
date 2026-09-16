@@ -6,6 +6,7 @@
 
 import { buildFieldData } from "./mapping.js";
 import { FileMaker, Box, slackNotify, verifyTurnstile } from "./services.js";
+import { validateContainerTest, runContainerTest } from "./container-test.js";
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data, null, 2), {
@@ -111,6 +112,12 @@ async function handleSubmission(request, env, ctx) {
   const adultCount = payload?.application?.adultCount || payload?.adults?.length || 1;
   const filemakerOnly = payload?.testMode === "filemaker-only"
     && String(primary.otherNames || "").startsWith("TEST-LEASE-");
+  const containerTest = payload?.testMode === "filemaker-containers";
+  let testSignature;
+  if (containerTest) {
+    try { testSignature = validateContainerTest(payload, files); }
+    catch (_) { return json({ ok: false, code: "INVALID_CONTAINER_TEST" }, 400); }
+  }
 
   const result = { ok: true, applicationNumber, steps: {} };
   const fm = new FileMaker(env);
@@ -122,6 +129,10 @@ async function handleSubmission(request, env, ctx) {
     const fieldData = buildFieldData(payload, { applicationNumber, ip });
     const recordId = await fm.createRecord("API_APPLICATIONS", fieldData);
     result.steps.filemaker = { ok: true, recordId };
+    if (containerTest) {
+      const containers = await runContainerTest(fm, recordId, payload, files, testSignature);
+      return json({ ok: true, testMode: "filemaker-containers", applicationNumber, containers }, 200);
+    }
 
     // Controlled integration test: create only the FileMaker APPLICATIONS record.
     // The TEST-LEASE marker prevents ordinary applicants from suppressing the downstream pipeline.
@@ -197,6 +208,10 @@ async function handleSubmission(request, env, ctx) {
       result.steps.email = { ok: false, error: String(e.message || e) };
     }
   } catch (e) {
+    if (containerTest || filemakerOnly) {
+      console.error("Synthetic FileMaker test failed", { applicationNumber, error: String(e.message || e) });
+      return json({ ok: false, code: "FILEMAKER_TEST_FAILED", applicationNumber, recordId: result.steps.filemaker?.recordId || null, partialCapture: Boolean(result.steps.filemaker?.ok) }, 502);
+    }
     // Authoritative capture failed — do NOT lose the applicant's data.
     result.steps.filemaker = { ok: false, error: String(e.message || e) };
     try {
@@ -247,6 +262,7 @@ async function handleApi(request, env) {
       slackConfigured: Boolean(env.SLACK_WEBHOOK_URL),
       turnstileConfigured: Boolean(env.TURNSTILE_SECRET),
       filemakerOnlyTestSupported: true,
+      filemakerContainerTestSupported: true,
     });
   }
   if (request.method === "GET" && url.pathname === "/api/catalog") {
