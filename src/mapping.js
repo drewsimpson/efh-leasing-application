@@ -98,7 +98,7 @@ function mapPrimary(fd, a) {
     fd.PreviousZip = p.zip || "";
     fd.PreviousLandlordName = p.landlordName || "";
     fd.LandlordPhoneNumber = p.landlordPhone || "";
-    fd.LandlordEmail = p.landlordEmail || "";
+    fd.PreviousLandlordEmail = p.landlordEmail || "";
     fd.PreviousMonthlyRent = p.rentAmount || "";
     fd.PreviousResidencyFrom = d(p.fromDate);
     fd.PreviousResidencyTo = d(p.toDate);
