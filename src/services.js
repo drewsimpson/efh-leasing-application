@@ -101,7 +101,18 @@ export class FileMaker {
   }
   // Fetch a container's bytes (the Data API returns a temporary URL in field data).
   async getContainer(url) {
-    const r = await fetch(url, { headers: { Authorization: `Bearer ${this.token}` } });
+    if (new URL(url).origin !== new URL(this.base).origin) throw new Error("Unexpected container origin");
+    const headers = { Authorization: `Bearer ${this.token}` };
+    let r = await fetch(url, { headers, redirect: "manual" });
+    // Streaming authentication can issue a cookie on its initial 401 response.
+    if (r.status === 401) {
+      const cookies = typeof r.headers.getSetCookie === "function"
+        ? r.headers.getSetCookie() : [r.headers.get("set-cookie")].filter(Boolean);
+      if (cookies.length) {
+        headers.Cookie = cookies.map(c => c.split(";")[0]).join("; ");
+        r = await fetch(url, { headers, redirect: "manual" });
+      }
+    }
     if (!r.ok) throw new Error(`FM container fetch failed: ${r.status}`);
     return new Uint8Array(await r.arrayBuffer());
   }
