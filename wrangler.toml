@@ -16,6 +16,11 @@ FM_USERNAME = "cs.api"
 BOX_NEW_APPS_FOLDER_ID = "410696406003"
 BOX_SUBJECT_TYPE = "enterprise"
 
+# Enabled
+[observability]
+enabled = true
+head_sampling_rate = 1
+
 # ---------------------------------------------------------------------------
 # SECRETS — set with `wrangler secret put <NAME>` (never commit these):
 #   FM_USERNAME          web.api account (WEB_API privilege set, [fmrest])
