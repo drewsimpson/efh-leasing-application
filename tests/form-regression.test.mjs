@@ -55,8 +55,8 @@ test("additional applicant fields map to FileMaker", () => {
         firstName: "Primary", lastName: "Applicant",
         emergencyContact: { name: "Emergency Person", phone: "3055550111", relationship: "Sibling" },
         residences: [
-          { current: true, landlordEmail: "current@example.com" },
-          { current: false, landlordEmail: "previous1@example.com" },
+          { current: true, landlordEmail: "current@example.com", landlordPhone: "3055550100" },
+          { current: false, landlordEmail: "previous1@example.com", landlordPhone: "3055550101" },
           { current: false, landlordEmail: "previous2@example.com" },
         ],
         employers: [{ current: true, employmentStatus: "Employed Full-Time" }],
@@ -74,6 +74,10 @@ test("additional applicant fields map to FileMaker", () => {
   assert.equal(result.EmploymentStatus, "Employed Full-Time");
   assert.equal(result.CoApplicantEmploymentStatus, "Employed Part-Time");
   assert.equal(result.CurrentLandlordEmail, "current@example.com");
+  assert.equal(result.CurrentLandlordPhoneNumber, "3055550100");
+  assert.equal(result.PreviousLandlordPhone, "3055550101");
+  assert.ok(!("LandlordPhoneNumber" in result));
+  assert.ok(!("CurrentLandlordPhone" in result));
   assert.equal(result.PreviousLandlordEmail, "previous1@example.com");
   assert.equal(result.Previous2LandlordEmail, "previous2@example.com");
   assert.equal(result.CoApplicantCurrentLandlordEmail, "co-current@example.com");
