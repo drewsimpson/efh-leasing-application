@@ -6,8 +6,9 @@
 //   application: { propertyId, unitId, desiredMoveInDate, leaseTerm, quotedRent, adultCount, numberOfOccupants, howHeard, pets, vehiclesCount },
 //   adults: [ {                       // index 0 = primary, 1 = co-applicant 1, 2 = adult3, 3 = adult4
 //     firstName, middleName, lastName, otherNames, dob, ssnLast4, dlNumber, dlState, phone, secondaryPhone, email, relationship,
-//     residences: [ { current:bool, address, city, state, zip, fromDate, toDate, rentAmount, landlordName, landlordPhone, utilityInName, reasonForLeaving, rentPaidInFull, gaveNotice, askedToMove } ],
-//     employers:  [ { current:bool, employer, title, address, supervisor, phone, monthlyGross, fromDate, toDate } ]
+//     residences: [ { current:bool, address, city, state, zip, fromDate, toDate, rentAmount, landlordName, landlordPhone, landlordEmail, utilityInName, reasonForLeaving, rentPaidInFull, gaveNotice, askedToMove } ],
+//     employers:  [ { current:bool, employmentStatus, employer, title, address, supervisor, phone, monthlyGross, fromDate, toDate } ],
+//     emergencyContact: { name, phone, relationship } // primary applicant only
 //   } ],
 //   background: { evicted, evictedExplain, brokeLease, brokeLeaseExplain, bankruptcy, bankruptcyExplain, felony, felonyExplain, lawsuit, lawsuitExplain, smoker },
 //   consent: { screening, contactAuth, feeAck },
@@ -34,6 +35,7 @@ function residence(fd, prefix, res) {
   fd[`${prefix}RentAmount`] = res.rentAmount || "";
   fd[`${prefix}LandlordName`] = res.landlordName || "";
   fd[`${prefix}LandlordPhone`] = res.landlordPhone || "";
+  fd[`${prefix}LandlordEmail`] = res.landlordEmail || "";
   fd[`${prefix}UtilityInName`] = res.utilityInName || "";
   fd[`${prefix}ReasonForLeaving`] = res.reasonForLeaving || "";
   fd[`${prefix}RentPaidInFull`] = yn(res.rentPaidInFull);
@@ -77,6 +79,7 @@ function mapPrimary(fd, a) {
     fd.CurrentZip = cur.zip || "";
     fd.CurrentLandLord = cur.landlordName || "";
     fd.CurrentLandlordPhone = cur.landlordPhone || "";
+    fd.CurrentLandlordEmail = cur.landlordEmail || "";
     fd.CurrentRentAmount = cur.rentAmount || "";
     fd.CurrentResidencyFrom = d(cur.fromDate);
     fd.CurrentResidencyTo = d(cur.toDate);
@@ -95,6 +98,7 @@ function mapPrimary(fd, a) {
     fd.PreviousZip = p.zip || "";
     fd.PreviousLandlordName = p.landlordName || "";
     fd.LandlordPhoneNumber = p.landlordPhone || "";
+    fd.LandlordEmail = p.landlordEmail || "";
     fd.PreviousMonthlyRent = p.rentAmount || "";
     fd.PreviousResidencyFrom = d(p.fromDate);
     fd.PreviousResidencyTo = d(p.toDate);
@@ -111,6 +115,7 @@ function mapPrimary(fd, a) {
   const curE = E.find((e) => e.current) || E[0];
   if (curE) {
     fd.EmployerName = curE.employer || "";
+    fd.EmploymentStatus = curE.employmentStatus || "";
     fd.JobTitle = curE.title || "";
     fd.EmployerAddress = curE.address || "";
     fd.EmployerPhone = curE.phone || "";
@@ -123,6 +128,11 @@ function mapPrimary(fd, a) {
   ["PrevEmployer1", "PrevEmployer2", "PrevEmployer3"].forEach((pfx, i) => {
     if (prevE[i]) employer(fd, pfx, prevE[i]);
   });
+
+  const emergency = a.emergencyContact || {};
+  fd.EmergencyContactName = emergency.name || "";
+  fd.EmergencyContactPhone = emergency.phone || "";
+  fd.EmergencyContactRelationship = emergency.relationship || "";
 }
 
 // Co-applicant 1 (adults[1]) — full history under CoApplicant* prefix.
@@ -150,6 +160,7 @@ function mapCoApplicant(fd, a) {
   const E = a.employers || [];
   const curE = E.find((e) => e.current) || E[0];
   employer(fd, "CoApplicantEmployer", curE);
+  if (curE) fd.CoApplicantEmploymentStatus = curE.employmentStatus || "";
   const prevE = E.filter((e) => !e.current);
   ["CoApplicantPrevEmployer1", "CoApplicantPrevEmployer2", "CoApplicantPrevEmployer3"].forEach((pfx, i) => {
     if (prevE[i]) employer(fd, pfx, prevE[i]);

@@ -526,6 +526,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         '<div class="field ownerfields"><label class="flabel">Monthly rent</label><input type="text" data-f="rentAmount" inputmode="decimal" placeholder="$"></div>'+
         '<div class="field ownerfields"><label class="flabel">Landlord / owner name</label><input type="text" data-f="landlordName"></div>'+
         '<div class="field ownerfields"><label class="flabel">Landlord / owner phone</label><input type="tel" data-f="landlordPhone" placeholder="(305) 555-0100"></div>'+
+        '<div class="field ownerfields"><label class="flabel">Landlord / owner email</label><input type="email" data-f="landlordEmail" placeholder="name@example.com"></div>'+
         '<div class="field ownerfields"><label class="flabel">Utilities billed in whose name?</label><input type="text" data-f="utilityInName"></div>'+
         '<div class="field full ownerfields"><label class="flabel">Reason for leaving</label><input type="text" data-f="reasonForLeaving"></div>'+
         '<div class="field full ownerfields"><label class="flabel" style="margin-bottom:2px">Landlord history <span class="opt">(all that apply)</span></label>'+
@@ -539,7 +540,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   }
 
   /* ---------- employment block ---------- */
-  function employmentHTML(kind,idx){
+  function employmentHTML(kind,idx,showStatus){
     var title = kind==="current" ? "Current employment" : "Previous employer";
     var tag = kind==="current" ? "Present job" : ("Prior job "+idx);
     return ''+
@@ -548,6 +549,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         (kind==="prev"?'<button type="button" class="rm" data-rm="emp">Remove</button>':'')+
       '</div>'+
       '<div class="grid">'+
+        (kind==="current"&&showStatus?'<div class="field"><label class="flabel">Employment status <span class="req">*</span></label><select data-f="employmentStatus"><option value="">Select status</option><option>Employed Full-Time</option><option>Employed Part-Time</option><option>Self-Employed</option><option>Retired</option><option>Student</option><option>Unemployed</option><option>Other</option></select></div>':'')+
         '<div class="field"><label class="flabel">Employer <span class="req">*</span></label><input type="text" data-f="employer"></div>'+
         '<div class="field"><label class="flabel">Occupation / title</label><input type="text" data-f="title"></div>'+
         '<div class="field full"><label class="flabel">Employer address</label><input type="text" data-f="address"></div>'+
@@ -560,9 +562,9 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   }
 
   /* ---------- document block (first two adults) ---------- */
-  function docsHTML(){
+  function docsHTML(sectionNumber){
     return ''+
-    '<div class="sectitle" style="margin-top:30px"><span class="num">4</span><h3>Documents</h3></div>'+
+    '<div class="sectitle" style="margin-top:30px"><span class="num">'+sectionNumber+'</span><h3>Documents</h3></div>'+
     '<p class="sechint">Clear photos or PDFs are fine. Required from the first two adults on the lease.</p>'+
     '<div class="docgrid" style="margin-top:6px">'+
       dropHTML("Driver's license — front","JPG, PNG or PDF",false,"DL_Front")+
@@ -609,20 +611,22 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         '<div class="field"><label class="flabel">License state</label><select data-f="dlState">'+stateOptions()+'</select></div>'+
         '<div class="field"><label class="flabel">Best phone <span class="req">*</span></label><input type="tel" data-f="phone" placeholder="(305) 555-0100"></div>'+
         '<div class="field"><label class="flabel">Secondary phone</label><input type="tel" data-f="secondaryPhone"></div>'+
-        '<div class="field full"><label class="flabel">Email <span class="req">*</span></label><input type="email" data-f="email" placeholder="name@email.com"></div>'+
+      '<div class="field full"><label class="flabel">Email <span class="req">*</span></label><input type="email" data-f="email" placeholder="name@email.com"></div>'+
       '</div>'+
 
-      '<div class="sectitle"><span class="num">2</span><h3>Residence history</h3></div>'+
+      (isPrimary?'<div class="sectitle"><span class="num">2</span><h3>Emergency contact</h3></div><div class="grid" data-emergency style="margin-top:6px"><div class="field"><label class="flabel">Contact name <span class="req">*</span></label><input type="text" data-f="name"></div><div class="field"><label class="flabel">Contact phone <span class="req">*</span></label><input type="tel" data-f="phone" placeholder="(305) 555-0100"></div><div class="field"><label class="flabel">Relationship <span class="req">*</span></label><input type="text" data-f="relationship"></div></div>':'')+
+
+      '<div class="sectitle"><span class="num">'+(isPrimary?'3':'2')+'</span><h3>Residence history</h3></div>'+
       '<p class="sechint">Start with where you live now. Add previous addresses to cover about 3 years — up to 3 prior residences.</p>'+
       '<div data-reslist>'+residenceHTML("current",0)+'</div>'+
       '<button type="button" class="addbtn" data-add="res">'+ICON_PLUS+' Add previous residence <span data-rescount style="color:var(--faint);font-weight:500">(0 of 3)</span></button>'+
 
-      '<div class="sectitle"><span class="num">3</span><h3>Employment history</h3></div>'+
+      '<div class="sectitle"><span class="num">'+(isPrimary?'4':'3')+'</span><h3>Employment history</h3></div>'+
       '<p class="sechint">Start with your current job. Add previous employers to cover the last 10 years.</p>'+
-      '<div data-emplist>'+employmentHTML("current",0)+'</div>'+
+      '<div data-emplist>'+employmentHTML("current",0,i<2)+'</div>'+
       '<button type="button" class="addbtn" data-add="emp">'+ICON_PLUS+' Add previous employer <span data-empcount style="color:var(--faint);font-weight:500">(0 of 3)</span></button>'+
 
-      (docs?docsHTML():'<div class="note info" style="margin-top:26px"><span class="ni">📄</span><div>No ID or financial documents are required from this co-applicant. Only the first two adults on the lease upload documents.</div></div>')+
+      (docs?docsHTML(isPrimary?5:4):'<div class="note info" style="margin-top:26px"><span class="ni">📄</span><div>No ID or financial documents are required from this co-applicant. Only the first two adults on the lease upload documents.</div></div>')+
     '</section>';
   }
 
@@ -777,7 +781,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       empBtn.addEventListener("click",function(){
         var count=empList.querySelectorAll('[data-emp="prev"]').length;
         if(count>=3)return;
-        empList.insertAdjacentHTML("beforeend",employmentHTML("prev",count+1));
+        empList.insertAdjacentHTML("beforeend",employmentHTML("prev",count+1,false));
         attachRemovers(sec); updateEmpCount(sec); saveDraft();
       });
       attachRemovers(sec); updateResCount(sec); updateEmpCount(sec);
@@ -950,14 +954,14 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     return { current: sub.getAttribute('data-res')==='current',
       address:v(q('address')), city:v(q('city')), state:v(q('state')), zip:v(q('zip')),
       fromDate:v(q('fromDate')), toDate:v(q('toDate')), rentAmount:v(q('rentAmount')),
-      landlordName:v(q('landlordName')), landlordPhone:v(q('landlordPhone')), utilityInName:v(q('utilityInName')),
+      landlordName:v(q('landlordName')), landlordPhone:v(q('landlordPhone')), landlordEmail:v(q('landlordEmail')), utilityInName:v(q('utilityInName')),
       reasonForLeaving:v(q('reasonForLeaving')), rentPaidInFull:ck(q('rentPaidInFull')),
       gaveNotice:ck(q('gaveNotice')), askedToMove:ck(q('askedToMove')) };
   }
   function collectEmployer(sub){
     var q=function(f){ return sub.querySelector('[data-f="'+f+'"]'); };
     return { current: sub.getAttribute('data-emp')==='current',
-      employer:v(q('employer')), title:v(q('title')), address:v(q('address')), supervisor:v(q('supervisor')),
+      employmentStatus:v(q('employmentStatus')), employer:v(q('employer')), title:v(q('title')), address:v(q('address')), supervisor:v(q('supervisor')),
       phone:v(q('phone')), monthlyGross:v(q('monthlyGross')), fromDate:v(q('fromDate')), toDate:v(q('toDate')) };
   }
   function collectAdult(sec){
@@ -967,6 +971,11 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       otherNames:v(q('otherNames')), dob:v(q('dob')), ssnLast4:v(q('ssnLast4')),
       dlNumber:v(q('dlNumber')), dlState:v(q('dlState')), phone:v(q('phone')),
       secondaryPhone:v(q('secondaryPhone')), email:v(q('email')) };
+    var emergency=sec.querySelector('[data-emergency]');
+    if(emergency){
+      var eq=function(f){return emergency.querySelector('[data-f="'+f+'"]');};
+      a.emergencyContact={name:v(eq('name')),phone:v(eq('phone')),relationship:v(eq('relationship'))};
+    }
     a.residences=[].map.call(sec.querySelectorAll('[data-res]'), collectResidence);
     a.employers=[].map.call(sec.querySelectorAll('[data-emp]'), collectEmployer);
     return a;

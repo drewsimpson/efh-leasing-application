@@ -47,6 +47,42 @@ test("working FileMaker mapping remains intact", () => {
   assert.equal(result.TermsAndConditionsAccepted, 1);
 });
 
+test("additional applicant fields map to FileMaker", () => {
+  const result = buildFieldData({
+    application: { adultCount: 2 },
+    adults: [
+      {
+        firstName: "Primary", lastName: "Applicant",
+        emergencyContact: { name: "Emergency Person", phone: "3055550111", relationship: "Sibling" },
+        residences: [
+          { current: true, landlordEmail: "current@example.com" },
+          { current: false, landlordEmail: "previous1@example.com" },
+          { current: false, landlordEmail: "previous2@example.com" },
+        ],
+        employers: [{ current: true, employmentStatus: "Employed Full-Time" }],
+      },
+      {
+        firstName: "Co", lastName: "Applicant",
+        residences: [
+          { current: true, landlordEmail: "co-current@example.com" },
+          { current: false, landlordEmail: "co-previous1@example.com" },
+        ],
+        employers: [{ current: true, employmentStatus: "Employed Part-Time" }],
+      },
+    ],
+  }, { applicationNumber: "TEST-LEASE-FIELDS", ip: "192.0.2.1" });
+  assert.equal(result.EmploymentStatus, "Employed Full-Time");
+  assert.equal(result.CoApplicantEmploymentStatus, "Employed Part-Time");
+  assert.equal(result.CurrentLandlordEmail, "current@example.com");
+  assert.equal(result.LandlordEmail, "previous1@example.com");
+  assert.equal(result.Previous2LandlordEmail, "previous2@example.com");
+  assert.equal(result.CoApplicantCurrentLandlordEmail, "co-current@example.com");
+  assert.equal(result.CoApplicantPrevious1LandlordEmail, "co-previous1@example.com");
+  assert.equal(result.EmergencyContactName, "Emergency Person");
+  assert.equal(result.EmergencyContactPhone, "3055550111");
+  assert.equal(result.EmergencyContactRelationship, "Sibling");
+});
+
 test("FileMaker-only mode is limited to explicit synthetic test records", () => {
   assert.match(worker, /payload\?\.testMode === "filemaker-only"/);
   assert.match(worker, /startsWith\("TEST-LEASE-"\)/);
