@@ -103,18 +103,29 @@ export class FileMaker {
   async getContainer(url) {
     if (new URL(url).origin !== new URL(this.base).origin) throw new Error("Unexpected container origin");
     const headers = { Authorization: `Bearer ${this.token}` };
-    let r = await fetch(url, { headers, redirect: "manual" });
-    // Streaming authentication can issue a cookie on its initial 401 response.
-    if (r.status === 401) {
+    let target = url;
+    const jar = new Map();
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const r = await fetch(target, { headers, redirect: "manual" });
       const cookies = typeof r.headers.getSetCookie === "function"
         ? r.headers.getSetCookie() : [r.headers.get("set-cookie")].filter(Boolean);
-      if (cookies.length) {
-        headers.Cookie = cookies.map(c => c.split(";")[0]).join("; ");
-        r = await fetch(url, { headers, redirect: "manual" });
+      for (const cookie of cookies) {
+        const pair = cookie.split(";")[0];
+        jar.set(pair.split("=")[0], pair);
       }
+      if (jar.size) headers.Cookie = [...jar.values()].join("; ");
+      if ([301,302,303,307,308].includes(r.status)) {
+        const location = r.headers.get("location");
+        if (!location) throw new Error("Container redirect missing location");
+        target = new URL(location, target).href;
+        if (new URL(target).origin !== new URL(this.base).origin) throw new Error("Unexpected container redirect origin");
+        continue;
+      }
+      if (r.status === 401 && cookies.length && attempt === 0) continue;
+      if (!r.ok) throw new Error(`FM container fetch failed: ${r.status}`);
+      return new Uint8Array(await r.arrayBuffer());
     }
-    if (!r.ok) throw new Error(`FM container fetch failed: ${r.status}`);
-    return new Uint8Array(await r.arrayBuffer());
+    throw new Error("Container authentication or redirect limit exceeded");
   }
 }
 
