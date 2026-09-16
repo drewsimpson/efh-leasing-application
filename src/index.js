@@ -131,7 +131,7 @@ async function handleSubmission(request, env, ctx) {
     result.steps.filemaker = { ok: true, recordId };
     if (containerTest) {
       const containers = await runContainerTest(fm, recordId, payload, files, testSignature);
-      return json({ ok: true, testMode: "filemaker-containers", applicationNumber, containers }, 200);
+      return json({ ok: containers.uploadsComplete && containers.verificationComplete, captured: true, testMode: "filemaker-containers", applicationNumber, containers }, containers.uploadsComplete && containers.verificationComplete ? 200 : 207);
     }
 
     // Controlled integration test: create only the FileMaker APPLICATIONS record.
@@ -263,6 +263,7 @@ async function handleApi(request, env) {
       turnstileConfigured: Boolean(env.TURNSTILE_SECRET),
       filemakerOnlyTestSupported: true,
       filemakerContainerTestSupported: true,
+      containerResultsVersion: 2,
     });
   }
   if (request.method === "GET" && url.pathname === "/api/catalog") {
