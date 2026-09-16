@@ -42,6 +42,25 @@ test("document creation failure does not stop later document uploads", async () 
   assert.equal(r.uploadsComplete, false);
 });
 
+test("streaming redirects retain cookies and never forward credentials to another origin", async () => {
+  const original = globalThis.fetch; let calls = 0;
+  globalThis.fetch = async (url, options) => {
+    calls++;
+    if (calls === 1) return new Response("", { status: 302, headers: { location: "/file", "set-cookie": "stream=value; Secure" } });
+    assert.equal(url, "https://fms.example.test/file");
+    assert.equal(options.headers.Cookie, "stream=value");
+    return new Response(new Uint8Array([7]));
+  };
+  try {
+    const fm = new FileMaker({ FM_HOST: "fms.example.test", FM_DATABASE: "Test" }); fm.token = "token";
+    assert.deepEqual(await fm.getContainer("https://fms.example.test/start"), new Uint8Array([7]));
+    calls = 0;
+    globalThis.fetch = async () => { calls++; return new Response("", { status: 302, headers: { location: "https://foreign.test/file" } }); };
+    await assert.rejects(() => fm.getContainer("https://fms.example.test/start"), /origin/);
+    assert.equal(calls, 1);
+  } finally { globalThis.fetch = original; }
+});
+
 test("container validation rejects missing signatures, empty files and unsupported applicants", () => {
   assert.equal(validateContainerTest(payload, files).type, "image/png");
   assert.throws(() => validateContainerTest({ ...payload, signature: {} }, files));
