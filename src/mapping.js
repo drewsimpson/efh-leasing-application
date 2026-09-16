@@ -78,7 +78,7 @@ function mapPrimary(fd, a) {
     fd.CurrentState = cur.state || "";
     fd.CurrentZip = cur.zip || "";
     fd.CurrentLandLord = cur.landlordName || "";
-    fd.CurrentLandlordPhone = cur.landlordPhone || "";
+    fd.CurrentLandlordPhoneNumber = cur.landlordPhone || "";
     fd.CurrentLandlordEmail = cur.landlordEmail || "";
     fd.CurrentRentAmount = cur.rentAmount || "";
     fd.CurrentResidencyFrom = d(cur.fromDate);
@@ -97,7 +97,7 @@ function mapPrimary(fd, a) {
     fd.PreviousState = p.state || "";
     fd.PreviousZip = p.zip || "";
     fd.PreviousLandlordName = p.landlordName || "";
-    fd.LandlordPhoneNumber = p.landlordPhone || "";
+    fd.PreviousLandlordPhone = p.landlordPhone || "";
     fd.PreviousLandlordEmail = p.landlordEmail || "";
     fd.PreviousMonthlyRent = p.rentAmount || "";
     fd.PreviousResidencyFrom = d(p.fromDate);
