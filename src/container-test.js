@@ -14,14 +14,18 @@ export function validateContainerTest(payload, files) {
 }
 
 async function verifiedUpload(fm, layout, recordId, field, file) {
-  await fm.uploadContainer(layout, recordId, field, file);
+  const result = { fileName: file.name, bytes: file.size, uploaded: false, verified: false };
+  try { await fm.uploadContainer(layout, recordId, field, file); result.uploaded = true; }
+  catch (e) { return { ...result, uploadError: String(e.message || e) }; }
+  try {
   const stored = await fm.getRecord(layout, recordId);
   const url = stored[field];
   if (!url || new URL(url).origin !== new URL(fm.base).origin) throw new Error("Missing or unexpected container URL");
   const downloaded = await fm.getContainer(url);
   const original = new Uint8Array(await file.arrayBuffer());
   if (downloaded.length !== original.length || !downloaded.every((b,i) => b === original[i])) throw new Error("Container byte verification failed");
-  return { fileName: file.name, bytes: original.length, verified: true };
+  return { ...result, verified: true };
+  } catch (e) { return { ...result, verificationError: String(e.message || e) }; }
 }
 
 export async function runContainerTest(fm, recordId, payload, files, signature) {
@@ -31,6 +35,8 @@ export async function runContainerTest(fm, recordId, payload, files, signature) 
   const result = { applicationId, recordId, signature: await verifiedUpload(fm, "API_APPLICATIONS", recordId, "SignatureTenant", signature), documents: [] };
   for (const f of files) {
     const a = payload.adults[f.adultIndex];
+    const item = { recordId: null, adultIndex: f.adultIndex + 1, docType: f.docType, fileName: f.file.name, bytes: f.file.size, uploaded: false, verified: false };
+    try {
     const docRecordId = await fm.createRecord("API_APP_DOCUMENTS", {
       _fk_ApplicationID: applicationId,
       AdultIndex: f.adultIndex + 1,
@@ -39,6 +45,10 @@ export async function runContainerTest(fm, recordId, payload, files, signature) 
       FileSizeBytes: f.file.size, MimeType: f.file.type,
     });
     result.documents.push({ recordId: docRecordId, adultIndex: f.adultIndex + 1, docType: f.docType, ...await verifiedUpload(fm, "API_APP_DOCUMENTS", docRecordId, "DocFile", f.file) });
+    } catch (e) { result.documents.push({ ...item, recordError: String(e.message || e) }); }
   }
+  const items = [result.signature, ...result.documents];
+  result.uploadsComplete = items.every(i => i.uploaded);
+  result.verificationComplete = items.every(i => i.verified);
   return result;
 }
