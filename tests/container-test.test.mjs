@@ -7,6 +7,41 @@ const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCA
 const payload = { adults: [{ firstName: "Test", lastName: "Primary", otherNames: "TEST-LEASE-CONTAINERS" }, { firstName: "Test", lastName: "Co" }], signature: { imageBase64: png } };
 const files = [{ adultIndex: 1, docType: "Paystub", file: new File(["%PDF-test"], "paystub_TEST.pdf", { type: "application/pdf" }) }];
 
+test("streaming download retries with server cookie and rejects foreign origins", async () => {
+  const original = globalThis.fetch; const calls = [];
+  globalThis.fetch = async (url, options) => {
+    calls.push({ url, headers: { ...options.headers } });
+    return calls.length === 1 ? new Response("", { status: 401, headers: { "set-cookie": "stream=secret; Path=/; Secure" } }) : new Response(new Uint8Array([1,2,3]));
+  };
+  try {
+    const fm = new FileMaker({ FM_HOST: "fms.example.test", FM_DATABASE: "Test" }); fm.token = "token";
+    assert.deepEqual(await fm.getContainer("https://fms.example.test/Streaming_SSL/test"), new Uint8Array([1,2,3]));
+    assert.equal(calls[1].headers.Cookie, "stream=secret");
+    assert.equal(calls[1].headers.Authorization, "Bearer token");
+    await assert.rejects(() => fm.getContainer("https://foreign.test/file"), /origin/);
+    assert.equal(calls.length, 2);
+  } finally { globalThis.fetch = original; }
+});
+
+test("document creation failure does not stop later document uploads", async () => {
+  let created = 0;
+  const fm = {
+    base: "https://fms.example.test",
+    getRecord: async () => ({ __pk_ApplicationID: "uuid", SignatureTenant: "https://fms.example.test/sig", DocFile: "https://fms.example.test/doc" }),
+    uploadContainer: async () => {},
+    getContainer: async () => { throw new Error("fetch 401"); },
+    createRecord: async () => { if (++created === 1) throw new Error("invalid metadata"); return "doc-2"; },
+  };
+  const r = await runContainerTest(fm, "app", payload, [...files, ...files], validateContainerTest(payload, files));
+  assert.equal(r.signature.uploaded, true);
+  assert.equal(r.signature.verified, false);
+  assert.equal(r.documents.length, 2);
+  assert.match(r.documents[0].recordError, /metadata/);
+  assert.equal(r.documents[1].recordId, "doc-2");
+  assert.equal(r.documents[1].uploaded, true);
+  assert.equal(r.uploadsComplete, false);
+});
+
 test("container validation rejects missing signatures, empty files and unsupported applicants", () => {
   assert.equal(validateContainerTest(payload, files).type, "image/png");
   assert.throws(() => validateContainerTest({ ...payload, signature: {} }, files));
@@ -30,7 +65,11 @@ test("direct containers link by application UUID and verify actual bytes", async
   assert.equal(r.signature.verified, true);
   assert.equal(r.documents[0].bytes, 9);
   fm.getContainer = async () => new Uint8Array([1]);
-  await assert.rejects(() => runContainerTest(fm, "app-record", payload, files, validateContainerTest(payload, files)), /verification/);
+  const partial = await runContainerTest(fm, "app-record", payload, files, validateContainerTest(payload, files));
+  assert.equal(partial.uploadsComplete, true);
+  assert.equal(partial.verificationComplete, false);
+  assert.match(partial.signature.verificationError, /verification/);
+  assert.equal(partial.documents.length, 1);
 });
 
 test("FileMaker uploads use upload part and automatic multipart boundary", async () => {
