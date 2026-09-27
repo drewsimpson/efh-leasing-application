@@ -7,6 +7,7 @@
 import { buildFieldData } from "./mapping.js";
 import { FileMaker, Box, slackNotify, verifyTurnstile } from "./services.js";
 import { validateContainerTest, runContainerTest } from "./container-test.js";
+import { createApplicationDocuments } from "./documents.js";
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data, null, 2), {
@@ -30,7 +31,11 @@ function appNumber() {
   const n = String(Math.floor(1 + Math.random() * 9999)).padStart(4, "0");
   return `APP-${yr}-${n}`;
 }
-const DOC_TYPES = ["DL_Front", "DL_Back", "Bank_Statement", "Paystub", "Credit_Report"];
+const BACKFILL_APPLICATIONS = new Set([
+  "APP-2026-3943", "APP-2026-9572", "APP-2026-7202",
+  "APP-2026-8415", "APP-2026-7734", "APP-2026-6807",
+]);
+const BACKFILL_TOKEN_SHA256 = "219034bf8dc8fe94ec1d8de96e961ad787c09835996ed7c72784dcd1940e1303";
 
 // Lease term options offered on the form.
 const LEASE_TERMS = ["6 months", "12 months", "18 months"];
@@ -140,8 +145,11 @@ async function handleSubmission(request, env, ctx) {
       return json({ ok: true, applicationNumber, message: "FileMaker-only test application received.", testMode: true }, 200);
     }
 
-    // pull back the __pk_ApplicationID for child records (find by ApplicationNumber)
-    const appPk = fieldData.ApplicationNumber; // Worker-generated; APP_DOCUMENTS keys off it
+    // Pull back the true parent UUID. APP_DOCUMENTS::_fk_ApplicationID must not
+    // contain the human-facing ApplicationNumber.
+    const createdApplication = await fm.getRecord("API_APPLICATIONS", recordId);
+    const appPk = createdApplication.__pk_ApplicationID;
+    if (!appPk) throw new Error("Created application is missing __pk_ApplicationID");
 
     // 3. Box: per-application subfolder
     let boxFolderId, boxFolderUrl;
@@ -155,29 +163,13 @@ async function handleSubmission(request, env, ctx) {
       result.steps.box = { ok: false, error: String(e.message || e) };
     }
 
-    // 4. Documents → Box + APP_DOCUMENTS (first two adults only, enforced client-side too)
-    if (boxFolderId) {
-      for (const f of files) {
-        if (!DOC_TYPES.includes(f.docType)) continue;
-        try {
-          const bytes = new Uint8Array(await f.file.arrayBuffer());
-          const safeName = `${f.docType}_A${f.adultIndex + 1}_${f.file.name}`.replace(/[^\w.\- ]/g, "_");
-          const up = await box.uploadFile(safeName, bytes, boxFolderId, f.file.type || "application/octet-stream");
-          await fm.createRecord("API_APP_DOCUMENTS", {
-            ApplicationNumber: appPk,
-            AdultIndex: f.adultIndex + 1,
-            AdultName: applicantName,
-            DocType: f.docType,
-            FileName: f.file.name,
-            FileSizeBytes: f.file.size,
-            MimeType: f.file.type || "",
-            BoxFileID: up.id,
-            BoxFileURL: up.url,
-          });
-        } catch (e) {
-          (result.steps.documents ||= []).push({ docType: f.docType, ok: false, error: String(e.message || e) });
-        }
-      }
+    // 4. APP_DOCUMENTS + DocFile are authoritative and never depend on Box.
+    // Box is an optional secondary copy performed only after FileMaker verifies the container.
+    if (files.length) {
+      result.steps.documents = await createApplicationDocuments({
+        fm, box, boxFolderId, applicationId: appPk, applicationNumber,
+        adults: payload?.adults || [], files,
+      });
     }
 
     // 5. FileMaker: generate the application PDF from APPLICATION_Print, save to Box
@@ -242,12 +234,54 @@ async function handleSubmission(request, env, ctx) {
 
   // Applicant always sees success once we've captured (FM record or Box fallback).
   const captured = result.steps.filemaker?.ok || result.steps.fallback?.ok;
+  const documentFailure = files.length > 0 && !result.steps.documents?.complete;
   return json(
-    captured
-      ? { ok: true, applicationNumber, message: "Application received." }
+    captured && !documentFailure
+      ? { ok: true, applicationNumber, message: "Application received.", documents: result.steps.documents || { expected: 0, recordsCreated: 0, uploaded: 0, verified: 0, complete: true } }
+      : captured
+        ? { ok: false, captured: true, code: "DOCUMENTS_FAILED", applicationNumber, message: "The application was saved, but one or more documents could not be stored.", documents: result.steps.documents }
       : { ok: false, code: "CAPTURE_FAILED", message: "We couldn't submit your application. Please try again shortly." },
-    captured ? 200 : 502
+    captured && !documentFailure ? 200 : 502
   );
+}
+
+async function sha256Hex(value) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+  return [...digest].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function handleDocumentBackfill(request, env) {
+  const supplied = request.headers.get("X-EFH-Backfill-Token") || "";
+  if (!supplied || await sha256Hex(supplied) !== BACKFILL_TOKEN_SHA256) {
+    return json({ ok: false, code: "UNAUTHORIZED" }, 401);
+  }
+  const form = await request.formData();
+  const applicationNumber = String(form.get("applicationNumber") || "");
+  if (!BACKFILL_APPLICATIONS.has(applicationNumber)) return json({ ok: false, code: "APPLICATION_NOT_ALLOWED" }, 400);
+  const adults = JSON.parse(String(form.get("adults") || "[]"));
+  const files = [];
+  for (const [key, value] of form.entries()) {
+    if (key.startsWith("doc:") && value instanceof File) {
+      const [, adultIndex, docType] = key.split(":");
+      files.push({ adultIndex: Number(adultIndex), docType, file: value });
+    }
+  }
+  if (!files.length) return json({ ok: false, code: "FILES_REQUIRED" }, 400);
+
+  const fm = new FileMaker(env);
+  try {
+    await fm.login();
+    const matches = await fm.findRecords("API_APPLICATIONS", [{ ApplicationNumber: `==${applicationNumber}` }], { limit: 2 });
+    if (matches.length !== 1 || !matches[0].__pk_ApplicationID) return json({ ok: false, code: "APPLICATION_NOT_FOUND" }, 404);
+    const documents = await createApplicationDocuments({
+      fm, box: null, boxFolderId: null,
+      applicationId: matches[0].__pk_ApplicationID, applicationNumber, adults, files,
+    });
+    return json({ ok: documents.complete, applicationNumber, documents }, documents.complete ? 200 : 502);
+  } finally {
+    await fm.logout();
+  }
 }
 
 async function handleApi(request, env) {
@@ -274,6 +308,13 @@ async function handleApi(request, env) {
       return await handleSubmission(request, env);
     } catch (e) {
       return json({ ok: false, code: "SERVER_ERROR", message: String(e.message || e) }, 500);
+    }
+  }
+  if (url.pathname === "/api/maintenance/backfill-documents" && request.method === "POST") {
+    try {
+      return await handleDocumentBackfill(request, env);
+    } catch (e) {
+      return json({ ok: false, code: "BACKFILL_FAILED", message: String(e.message || e) }, 500);
     }
   }
   return json({ ok: false, code: "NOT_FOUND" }, 404);

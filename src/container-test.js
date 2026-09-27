@@ -13,7 +13,7 @@ export function validateContainerTest(payload, files) {
   return new File([bytes], "signature_TEST.png", { type: "image/png" });
 }
 
-async function verifiedUpload(fm, layout, recordId, field, file) {
+export async function verifiedUpload(fm, layout, recordId, field, file) {
   const result = { fileName: file.name, bytes: file.size, uploaded: false, verified: false };
   try { await fm.uploadContainer(layout, recordId, field, file); result.uploaded = true; }
   catch (e) { return { ...result, uploadError: String(e.message || e) }; }

@@ -46,6 +46,16 @@ export class FileMaker {
     if (code !== "0") throw new Error(`FM create on ${layout} failed (${code}): ${j?.messages?.[0]?.message}`);
     return j.response.recordId;
   }
+  async updateRecord(layout, recordId, fieldData) {
+    const r = await fetch(`${this.base}/layouts/${encodeURIComponent(layout)}/records/${encodeURIComponent(recordId)}`, {
+      method: "PATCH",
+      headers: this.headers(),
+      body: JSON.stringify({ fieldData }),
+    });
+    const j = await r.json();
+    const code = j?.messages?.[0]?.code;
+    if (code !== "0") throw new Error(`FM update on ${layout} failed (${code}): ${j?.messages?.[0]?.message}`);
+  }
   async getRecord(layout, recordId) {
     const r = await fetch(`${this.base}/layouts/${encodeURIComponent(layout)}/records/${encodeURIComponent(recordId)}`, { headers: this.headers() });
     const j = await r.json();
