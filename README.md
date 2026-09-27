@@ -1,3 +1,4 @@
+
 # EFH Leasing Application — Cloudflare Worker
 
 Backend + static host for the E.F. Hutton Realty rental application. Serves the form
@@ -61,3 +62,5 @@ replace the `APP_EmailApplicant` call in `src/index.js` step 6a.
   Box as `FAILED_<ref>.json` so nothing is lost. For guaranteed delivery under load, add a
   **Cloudflare Queue** (enqueue on submit, drain to FileMaker with retry) — recommended
   hardening before high traffic.
+
+Deployment refresh: FileMaker document persistence enabled.
