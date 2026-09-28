@@ -31,12 +31,6 @@ function appNumber() {
   const n = String(Math.floor(1 + Math.random() * 9999)).padStart(4, "0");
   return `APP-${yr}-${n}`;
 }
-const BACKFILL_APPLICATIONS = new Set([
-  "APP-2026-3943", "APP-2026-9572", "APP-2026-7202",
-  "APP-2026-8415", "APP-2026-7734", "APP-2026-6807",
-]);
-const BACKFILL_TOKEN_SHA256 = "219034bf8dc8fe94ec1d8de96e961ad787c09835996ed7c72784dcd1940e1303";
-
 // Lease term options offered on the form.
 const LEASE_TERMS = ["6 months", "12 months", "18 months"];
 
@@ -245,45 +239,6 @@ async function handleSubmission(request, env, ctx) {
   );
 }
 
-async function sha256Hex(value) {
-  const bytes = new TextEncoder().encode(value);
-  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
-  return [...digest].map((byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
-async function handleDocumentBackfill(request, env) {
-  const supplied = request.headers.get("X-EFH-Backfill-Token") || "";
-  if (!supplied || await sha256Hex(supplied) !== BACKFILL_TOKEN_SHA256) {
-    return json({ ok: false, code: "UNAUTHORIZED" }, 401);
-  }
-  const form = await request.formData();
-  const applicationNumber = String(form.get("applicationNumber") || "");
-  if (!BACKFILL_APPLICATIONS.has(applicationNumber)) return json({ ok: false, code: "APPLICATION_NOT_ALLOWED" }, 400);
-  const adults = JSON.parse(String(form.get("adults") || "[]"));
-  const files = [];
-  for (const [key, value] of form.entries()) {
-    if (key.startsWith("doc:") && value instanceof File) {
-      const [, adultIndex, docType] = key.split(":");
-      files.push({ adultIndex: Number(adultIndex), docType, file: value });
-    }
-  }
-  if (!files.length) return json({ ok: false, code: "FILES_REQUIRED" }, 400);
-
-  const fm = new FileMaker(env);
-  try {
-    await fm.login();
-    const matches = await fm.findRecords("API_APPLICATIONS", [{ ApplicationNumber: `==${applicationNumber}` }], { limit: 2 });
-    if (matches.length !== 1 || !matches[0].__pk_ApplicationID) return json({ ok: false, code: "APPLICATION_NOT_FOUND" }, 404);
-    const documents = await createApplicationDocuments({
-      fm, box: null, boxFolderId: null,
-      applicationId: matches[0].__pk_ApplicationID, applicationNumber, adults, files,
-    });
-    return json({ ok: documents.complete, applicationNumber, documents }, documents.complete ? 200 : 502);
-  } finally {
-    await fm.logout();
-  }
-}
-
 async function handleApi(request, env) {
   const url = new URL(request.url);
   if (request.method === "GET" && url.pathname === "/api/health") {
@@ -308,13 +263,6 @@ async function handleApi(request, env) {
       return await handleSubmission(request, env);
     } catch (e) {
       return json({ ok: false, code: "SERVER_ERROR", message: String(e.message || e) }, 500);
-    }
-  }
-  if (url.pathname === "/api/maintenance/backfill-documents" && request.method === "POST") {
-    try {
-      return await handleDocumentBackfill(request, env);
-    } catch (e) {
-      return json({ ok: false, code: "BACKFILL_FAILED", message: String(e.message || e) }, 500);
     }
   }
   return json({ ok: false, code: "NOT_FOUND" }, 404);
