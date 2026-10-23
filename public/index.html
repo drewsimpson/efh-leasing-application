@@ -456,16 +456,11 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <h2>Application received</h2>
         <p class="lede" style="margin:0 auto 4px">Thank you. Your application has been submitted to E.F. Hutton Realty.</p>
         <div class="appref" id="appRef">APP-000000</div>
-        <p class="hint" style="margin-bottom:4px">Here's what's happening behind the scenes:</p>
+        <p class="hint" style="margin-bottom:4px">Confirmed by the application server:</p>
         <ul class="pipe" id="pipe">
-          <li data-k="save"><span class="pi">💾</span><div class="pl"><b>Application saved</b><small>Stored the moment you clicked submit</small></div><span class="ps" data-ps></span></li>
-          <li data-k="pdf"><span class="pi">📄</span><div class="pl"><b>PDF generated</b><small>Full application rendered to PDF</small></div><span class="ps" data-ps></span></li>
-          <li data-k="email"><span class="pi">✉️</span><div class="pl"><b>Copy emailed to you</b><small>Sent to the address you provided</small></div><span class="ps" data-ps></span></li>
-          <li data-k="fm"><span class="pi">🗄️</span><div class="pl"><b>Written to TenanTrack</b><small>Created in APPLICATIONS via FileMaker Data API (fmrest)</small></div><span class="ps" data-ps></span></li>
-          <li data-k="box"><span class="pi">📦</span><div class="pl"><b>PDF &amp; documents saved to Box</b><small>New Applications › APP-2026-#### - Unit - Last, First</small></div><span class="ps" data-ps></span></li>
-          <li data-k="notify"><span class="pi">🔔</span><div class="pl"><b>Team notified</b><small>Email + Slack alert to the leasing team</small></div><span class="ps" data-ps></span></li>
+          <li data-k="save"><span class="pi">💾</span><div class="pl"><b>Application received</b><small>Keep the reference number above for follow-up.</small></div><span class="ps" data-ps></span></li>
+          <li data-k="documents" class="hidden"><span class="pi">📄</span><div class="pl"><b>Documents saved</b><small>Your uploaded documents were stored and verified.</small></div><span class="ps" data-ps></span></li>
         </ul>
-        <div class="note info" style="margin-top:22px;text-align:left"><span class="ni">ℹ️</span><div>In this mockup the pipeline is simulated. In production it runs in the Cloudflare Worker: the submission is queued first (so it never fails in front of an applicant), then relayed to FileMaker, Box, and notifications with automatic retry.</div></div>
         <button class="btn ghost" id="restart" style="margin-top:14px">Start a new application</button>
       </div>
     </section>
@@ -934,17 +929,15 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   }
 
   /* ---------- submit pipeline ---------- */
-  function runPipeline(){
-    var lis=document.querySelectorAll("#pipe li");
-    lis.forEach(function(li){li.classList.remove('act');li.querySelector('[data-ps]').innerHTML='';});
-    var idx=0;
-    function step(){
-      if(idx>0){var prev=lis[idx-1];prev.querySelector('[data-ps]').innerHTML='<svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
-      if(idx>=lis.length)return;
-      var li=lis[idx];li.classList.add('act');li.querySelector('[data-ps]').innerHTML='<span class="spin"></span>';
-      idx++; setTimeout(step,720);
-    }
-    step();
+  function runPipeline(result){
+    var save=document.querySelector('#pipe [data-k="save"]');
+    save.classList.add('act');
+    save.querySelector('[data-ps]').textContent='✓';
+    var docs=document.querySelector('#pipe [data-k="documents"]');
+    var confirmed=result.documents && result.documents.expected>0 && result.documents.complete===true;
+    docs.classList.toggle('hidden',!confirmed);
+    docs.classList.toggle('act',!!confirmed);
+    docs.querySelector('[data-ps]').textContent=confirmed?'✓':'';
   }
 
   /* ---------- collect + submit (production) ---------- */
@@ -1012,10 +1005,11 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       copyEmail:v(document.getElementById('copyEmail'))
     };
   }
-  function showDone(ref){
+  function showDone(ref,result){
+    if(!ref) throw new Error("Missing application confirmation");
     document.querySelector('.foot').classList.add('hidden');
-    document.getElementById("appRef").textContent = ref || ("APP-2026-"+String(Math.floor(1+Math.random()*4999)).padStart(4,"0"));
-    show(doneEl); window.scrollTo({top:0,behavior:"smooth"}); runPipeline();
+    document.getElementById("appRef").textContent = ref;
+    show(doneEl); window.scrollTo({top:0,behavior:"smooth"}); runPipeline(result);
     try{localStorage.removeItem(LS_KEY);}catch(e){}
   }
   var submitting=false;
@@ -1036,11 +1030,12 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     try{
       var res=await fetch('/api/applications',{method:'POST',body:form});
       var j=await res.json();
-      if(j && j.ok){ showDone(j.applicationNumber); }
-      else { alert((j&&j.message)||'Something went wrong submitting your application. Please try again.');
+      if(res.ok && j && j.ok===true && typeof j.applicationNumber==='string' && j.applicationNumber.trim()){ showDone(j.applicationNumber,j); }
+      else { alert(j && j.captured ? ((j.message||'The application was saved, but processing is incomplete.')+' Reference: '+(j.applicationNumber||'unavailable')+'. Contact the leasing team before submitting again to avoid a duplicate application.') : ((j&&j.message)||'Submission was not confirmed. Your entries are still here. Contact the leasing team before submitting again.'));
              next.disabled=false; next.innerHTML='Submit application'; submitting=false; }
     }catch(e){
-      showDone(null); submitting=false; // API unreachable (design preview) — confirm without a live write
+      alert('We could not confirm your submission. Your entries are still here. Contact the leasing team before submitting again to avoid a duplicate application.');
+      next.disabled=false; next.textContent='Submit application'; submitting=false;
     }
   }
 

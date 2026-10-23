@@ -39,6 +39,14 @@ export async function runContainerTest(fm, recordId, payload, files, signature) 
     try {
     const docRecordId = await fm.createRecord("API_APP_DOCUMENTS", {
       _fk_ApplicationID: applicationId,
+      ApplicationNumber: app.ApplicationNumber,
+      ApplicantRole: f.adultIndex === 0 ? "Primary Applicant" : "Co-Applicant",
+      DocFileName: f.file.name,
+      FileSize: f.file.size,
+      IsCurrent: 1,
+      ReviewStatus: "Pending Review",
+      SortOrder: result.documents.length + 1,
+      UploadSource: "Cloudflare Worker",
       AdultIndex: f.adultIndex + 1,
       AdultName: [a.firstName, a.lastName].filter(Boolean).join(" "),
       DocType: f.docType, FileName: f.file.name,
